@@ -16,6 +16,8 @@ action code {:
 	static final String TYPE_APPAREIL = "TypeAppareil";
 
 	Stack<String> stack = new Stack();
+	// Gets cleared after each statement
+	Stack<String> identifierStack = new Stack();
 	boolean programme_domus = false;
 	String currentClass;
 	String typeClass;
@@ -141,6 +143,31 @@ item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
 	}
 :};
 
+// PUNCTUATIONS
+item ::= COMMA {:
+	identifierStack.pop();
+:};
+item ::= DOT {: currentClass = ""; typeClass = ""; identifierStack.clear(); :};
+item ::= ASSIGN {::};
+
+item ::= CURLY_BRACKET_OPEN {:
+	stack.push("{");
+:};
+item ::= CURLY_BRACKET_CLOSE {:
+	if(stack.isEmpty() || stack.pop() != "{") {
+		throw new Exception("Missing curly bracket {");
+	}
+:};
+
+item ::= PARANTHESES_OPEN {:
+	stack.push("(");
+:};
+item ::= PARANTHESES_CLOSE {:
+	if(stack.isEmpty() || stack.pop() != "(") {
+		throw new Exception("Missing paranthese (");
+	}
+:};
+
 // CLASSES
 item ::= ECLAIRAGE:n {: setClass("CEclairage", (String) n); :};
 item ::= VOLET:n {: setClass("CVoletFenetre", (String) n); :};
@@ -152,27 +179,33 @@ item ::= AUTRE_APPAREIL:n {: setClass("CAutreAppareil", (String) n); :};
 item ::= CAFETIERE {: typeClass += "_CAFE"; :};
 item ::= HIFI {: typeClass += "_HIFI"; :};
 
-// OTHER STUFF
-item ::= COMMA {: :};
-item ::= DOT {: currentClass = ""; typeClass = ""; :};
-item ::= CURLY_BRACKET_OPEN {::};
-item ::= CURLY_BRACKET_CLOSE {::};
-item ::= PARANTHESES_OPEN {::};
-item ::= PARANTHESES_CLOSE {::};
-item ::= ASSIGN {::};
+
 
 // keys
 item ::= DEFINIR {:
-	currentClass = "CEnsAppareil";
+	if(stack.contains("DECLARATION_APPAREILS_OPEN_TAG")) {
+		currentClass = "CEnsAppareil";
+	}
 :};
 
 
 item ::= IDENTIFIER:s {:
+	identifierStack.push(s);
+	
 	if(currentClass != "") {
-		append(currentClass + " ");
-		append(s + " = new " + currentClass);
-		appendln("(\"" + s + "\", " + typeClass + ");");
-		appendln("ma_liste_appareils.add(" + s + ");");
+		if(identifierStack.size() < 2) {
+			append(currentClass + " " + s + " = new " + currentClass);
+		}
+
+		if(currentClass == "CEnsAppareil") {
+			appendln(identifierStack.get(0) + ".addAppareil(" + s + ");");
+		} else {
+			appendln("(\"" + s + "\", " + typeClass + ");");
+		}
+
+		if(identifierStack.get(0) == s) {
+			appendln("ma_liste_appareils.add(" + identifierStack.get(0) + ");");
+		}
 	}
 :};
 
