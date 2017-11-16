@@ -1,0 +1,132 @@
+import java_cup.runtime.*;
+
+parser code {:
+	public static void main(String args[]) throws Exception {
+		new parser(new Yylex(System.in)).parse();
+	}
+	
+	public void syntax_error(Symbol s){
+    System.out.println("compiler has detected a syntax error at line " + s.left 
+        + " column " + s.right);
+	}
+:}
+
+action code {:
+	boolean programme_domus = false;
+	String currentClass = "";
+:}
+
+terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
+ DECLARATION_APPAREILS_OPEN_TAG, DECLARATION_APPAREILS_CLOSE_TAG,
+ DECLARATION_INTERFACE_OPEN_TAG, DECLARATION_INTERFACE_CLOSE_TAG,
+ DECLARATION_SCENARII_OPEN_TAG, DECLARATION_SCENARII_CLOSE_TAG,
+ DECLARATION_COMMANDES_OPEN_TAG, DECLARATION_COMMANDES_CLOSE_TAG,
+ 
+ DEFINIR, EXECUTOR_SCENARIO, ASSOCIER, PROGRAMMER, MESSAGE, POURTOUT,
+ FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVERIR, FERMER, ETEINDRE, ALLUMER,
+ TASMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVERIR_PARTIEL, ALLUME, ETEIN,
+ DEMI, ECO, OUVERT, FERME, ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL,
+ INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
+ LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL,
+
+ DOT, COMMA, COLON, ASSIGN, SEMI_COLON, CURLY_BRACKET_OPEN, CURLY_BRACKET_CLOSE, EQUALS, PARANTHESES_OPEN, PARANTHESES_CLOSE;
+
+terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT;
+
+non terminal expr, list, item;
+
+expr	::= list {:
+	System.out.println("\n\nAnalyse terminee!");
+:} | {: System.out.println("Entree vide!"); :};
+
+list ::= item list | item;
+
+
+
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
+	 if(programme_domus) {
+	 	throw new Exception("DOMUS programme cannot start with a closing tag");
+	 } else {
+		programme_domus = true;
+	 }
+:};
+
+item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
+	 if(!programme_domus) {
+	 	throw new Exception("DOMUS programme cannot start with an opening tag");
+	 } else {
+		programme_domus = false;
+	 }
+:};
+
+// COMMENTS
+item ::= LINE_COMMENT:s {:
+	System.out.println(s);
+:};
+item ::= BLOCK_COMMENT:s {:
+	System.out.println(s);
+:};
+
+// TAGS
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
+	System.out.println();
+:};
+item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {::};
+
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
+	System.out.println();
+:};
+item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {::};
+
+// CLASSES
+item ::= ECLAIRAGE {: 
+ currentClass = "CEclairage";
+:};
+
+item ::= VOLET {: 
+ currentClass = "CVoletFenetre";
+:};
+
+item ::= CHAUFFAGE {: 
+ currentClass = "CChauffage";
+:};
+
+item ::= ALARME {: 
+ currentClass = "CAlarme";
+:};
+
+item ::= FENETRE {: 
+ currentClass = "CVoletFenetre";
+:};
+
+item ::= CAFETIERE {::};
+item ::= HIFI {::};
+
+item ::= AUTRE_APPAREIL {: 
+ currentClass = "CAutreAppareil";
+:};
+
+// OTHER STUFF
+item ::= COMMA {: :};
+item ::= DOT {: currentClass = ""; :};
+item ::= CURLY_BRACKET_OPEN {::};
+item ::= CURLY_BRACKET_CLOSE {::};
+item ::= PARANTHESES_OPEN {::};
+item ::= PARANTHESES_CLOSE {::};
+item ::= ASSIGN {::};
+
+// keys
+item ::= DEFINIR {:
+	currentClass = "CEnsAppareil";
+:};
+
+
+item ::= IDENTIFIER:s {:
+	if(currentClass != "") {
+		System.out.print(currentClass + " ");
+		System.out.print(s + " = new " + currentClass);
+		System.out.println("(\"" + s + "\", TYPE_APPAREIL." + currentClass + ");");
+		System.out.println("ma_liste_appareils.add(" + s + ");");
+	}
+:};
+
