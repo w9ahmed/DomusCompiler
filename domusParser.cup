@@ -72,35 +72,74 @@ expr	::= list {:
 
 list ::= item list | item;
 
-
-
-item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
-	 if(programme_domus) {
-	 	throw new Exception("DOMUS programme cannot start with a closing tag");
-	 } else {
-		programme_domus = true;
-		createFile();
-	 }
-:};
-
-item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-	 if(!programme_domus) {
-	 	throw new Exception("DOMUS programme cannot start with an opening tag");
-	 } else {
-		programme_domus = false;
-	 }
-:};
-
 // COMMENTS
 item ::= LINE_COMMENT:s {: appendln(s); :};
 item ::= BLOCK_COMMENT:s {: appendln(s); :};
 
 // TAGS
-item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: System.out.println(); :};
-item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {::};
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
+	if(!stack.isEmpty()) {
+		throw new Exception("DOMUS program should start with PROGRAMME_DOMUS_OPEN_TAG");
+	}
 
-item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: System.out.println(); :};
-item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {::};
+	stack.push("PROGRAMME_DOMUS_OPEN_TAG");
+	createFile();
+:};
+item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
+	if(stack.isEmpty() || stack.pop() != "PROGRAMME_DOMUS_OPEN_TAG") {
+		throw new Exception("Missing PROGRAMME_DOMUS_OPEN_TAG");
+	}
+:};
+
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
+	System.out.println();
+	stack.push("DECLARATION_APPAREILS_OPEN_TAG");
+:};
+item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
+	if(stack.isEmpty() || stack.pop() != "DECLARATION_APPAREILS_OPEN_TAG") {
+		throw new Exception("Missing DECLARATION_APPAREILS_OPEN_TAG");
+	}
+:};
+
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
+	System.out.println();
+	stack.push("DECLARATION_INTERFACE_OPEN_TAG");
+:};
+item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
+	if(stack.isEmpty() || stack.pop() != "DECLARATION_INTERFACE_OPEN_TAG") {
+		throw new Exception("Missing DECLARATION_INTERFACE_OPEN_TAG");
+	}
+:};
+
+item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
+	System.out.println();
+	stack.push("DECLARATION_SCENARII_OPEN_TAG");
+:};
+item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
+	if(stack.isEmpty() || stack.pop() != "DECLARATION_SCENARII_OPEN_TAG") {
+		throw new Exception("Missing DECLARATION_SCENARII_OPEN_TAG");
+	}
+:};
+
+item ::= SCENARIO_OPEN_TAG:s {:
+	System.out.println();
+	stack.push("SCENARIO_OPEN_TAG");
+:};
+item ::= SCENARIO_CLOSE_TAG:s {:
+	if(stack.isEmpty() || stack.pop() != "SCENARIO_OPEN_TAG") {
+		throw new Exception("Missing SCENARIO_OPEN_TAG");
+	}
+:};
+
+item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
+	System.out.println();
+	stack.push("DECLARATION_COMMANDES_OPEN_TAG");
+:};
+item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
+	if(stack.isEmpty() || stack.pop() != "DECLARATION_COMMANDES_OPEN_TAG") {
+		throw new Exception("Missing DECLARATION_COMMANDES_OPEN_TAG");
+	}
+:};
 
 // CLASSES
 item ::= ECLAIRAGE:n {: setClass("CEclairage", (String) n); :};
