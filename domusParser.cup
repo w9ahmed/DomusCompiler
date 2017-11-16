@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import java.util.Stack;
 import java.io.*;
 
 parser code {:
@@ -7,15 +8,14 @@ parser code {:
 	}
 	
 	public void syntax_error(Symbol s){
-    System.out.println("compiler has detected a syntax error at line " + s.left 
-        + " column " + s.right);
+    	System.out.println("compiler has detected a syntax error at line " + s.left + " column " + s.right);
 	}
 :}
 
 action code {:
-	static final String FILE_NAME = "CMaisonUser.java";
 	static final String TYPE_APPAREIL = "TypeAppareil";
 
+	Stack<String> stack = new Stack();
 	boolean programme_domus = false;
 	String currentClass;
 	String typeClass;
@@ -24,6 +24,8 @@ action code {:
 		currentClass = className;
 		typeClass = TYPE_APPAREIL + "." + classType.toUpperCase();
 	}
+
+	static final String FILE_NAME = "CMaisonUser.java";
 
 	public void createFile() throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME));
@@ -90,8 +92,8 @@ item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {:
 :};
 
 // COMMENTS
-item ::= LINE_COMMENT:s {: System.out.println(s); :};
-item ::= BLOCK_COMMENT:s {: System.out.println(s); :};
+item ::= LINE_COMMENT:s {: appendln(s); :};
+item ::= BLOCK_COMMENT:s {: appendln(s); :};
 
 // TAGS
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: System.out.println(); :};
@@ -113,7 +115,7 @@ item ::= HIFI {: typeClass += "_HIFI"; :};
 
 // OTHER STUFF
 item ::= COMMA {: :};
-item ::= DOT {: currentClass = ""; :};
+item ::= DOT {: currentClass = ""; typeClass = ""; :};
 item ::= CURLY_BRACKET_OPEN {::};
 item ::= CURLY_BRACKET_CLOSE {::};
 item ::= PARANTHESES_OPEN {::};

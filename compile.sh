@@ -58,3 +58,5 @@ echo -e $SEPERATOR
 echo 'Running parser on file:' $TESTFILE
 echo -e $SEPERATOR
 java parser < $TESTFILE
+
+code CMaisonUser.java

@@ -1,23 +1,24 @@
+<PROGRAMME_DOMUS>
 /*
 	Starting DOMUS PROGRAM
 */
-<PROGRAMME_DOMUS>
-<DECLARATION_APPAREILS>
-// this is my comment for that line
-eclairage e1, e2, e3.
-volet v1, v2, v3, v4.
-chauffage rad1.
-alarme a1.
-fenetre fen.
-autre_appareil(cafetiere) cafe.
-autre_appareil(hifi) hf.
-// Decleration ensemble appareils
-definir mon_eclairage_salon = {e2, e3}.
-</DECLARATION_APPAREILS>
+	<DECLARATION_APPAREILS>
+		// this is my comment for that line
+		eclairage e1, e2, e3.
+		volet v1, v2, v3, v4.
+		chauffage rad1.
+		alarme a1.
+		fenetre fen.
+		autre_appareil(cafetiere) cafe.
+		autre_appareil(hifi) hf.
 
-<DECLARATION_INTERFACE>
-// interrupteur b1, b2.
-// mobile m1.
-// telecommande c1.
-</DECLARATION_INTERFACE>
+		// Decleration ensemble appareils
+		definir mon_eclairage_salon = {e2, e3}.
+	</DECLARATION_APPAREILS>
+
+	<DECLARATION_INTERFACE>
+	// interrupteur b1, b2.
+	// mobile m1.
+	// telecommande c1.
+	</DECLARATION_INTERFACE>
 </PROGRAMME_DOMUS>
