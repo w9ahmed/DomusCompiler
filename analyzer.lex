@@ -52,12 +52,14 @@ import java_cup.runtime.Symbol;
 "eco" { return new Symbol(sym.ECO); }
 "ouvert" { return new Symbol(sym.OUVERT); }
 "ferme" { return new Symbol(sym.FERME); }
-"eclairage" { return new Symbol(sym.ECLAIRAGE); }
-"volet" { return new Symbol(sym.VOLET); }
-"chauffage" { return new Symbol(sym.CHAUFFAGE); }
-"alarme" { return new Symbol(sym.ALARME); }
-"fenetre" { return new Symbol(sym.FENETRE); }
-"autre_appareil" { return new Symbol(sym.AUTRE_APPAREIL); }
+
+"eclairage" { return new Symbol(sym.ECLAIRAGE, new String(yytext())); }
+"volet" { return new Symbol(sym.VOLET, new String(yytext())); }
+"chauffage" { return new Symbol(sym.CHAUFFAGE, new String(yytext())); }
+"alarme" { return new Symbol(sym.ALARME, new String(yytext())); }
+"fenetre" { return new Symbol(sym.FENETRE, new String(yytext())); }
+"autre_appareil" { return new Symbol(sym.AUTRE_APPAREIL, new String(yytext())); }
+
 "interrupteur" { return new Symbol(sym.INTERRUPTEUR); }
 "mobile" { return new Symbol(sym.MOBILE); }
 "telephone" { return new Symbol(sym.TELEPHONE); }

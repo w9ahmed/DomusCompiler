@@ -35,6 +35,12 @@ then
     rm -r CUP$parser$actions.class
 fi
 
+if [ -f CMaisonUser.java ]
+then
+		echo -e '\tDeleting CMaisonUser.java...'
+    rm -r CMaisonUser.java
+fi
+
 echo -e $SEPERATOR
 echo -e 'Compiling lex file:' $LEXFILE
 java JFlex.Main $LEXFILE

@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import java.io.*;
 
 parser code {:
 	public static void main(String args[]) throws Exception {
@@ -12,8 +13,36 @@ parser code {:
 :}
 
 action code {:
+	static final String FILE_NAME = "CMaisonUser.java";
+	static final String TYPE_APPAREIL = "TypeAppareil";
+
 	boolean programme_domus = false;
-	String currentClass = "";
+	String currentClass;
+	String typeClass;
+
+	public void setClass(String className, String classType) {
+		currentClass = className;
+		typeClass = TYPE_APPAREIL + "." + classType.toUpperCase();
+	}
+
+	public void createFile() throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME));
+		writer.write("");
+		writer.close();
+	}
+
+	public void append(String text) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
+		writer.append(text);
+		writer.close();
+	}
+
+	public void appendln(String text) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
+		writer.append(text);
+		writer.append("\n");
+		writer.close();
+	}
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -48,6 +77,7 @@ item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
 	 	throw new Exception("DOMUS programme cannot start with a closing tag");
 	 } else {
 		programme_domus = true;
+		createFile();
 	 }
 :};
 
@@ -60,51 +90,26 @@ item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {:
 :};
 
 // COMMENTS
-item ::= LINE_COMMENT:s {:
-	System.out.println(s);
-:};
-item ::= BLOCK_COMMENT:s {:
-	System.out.println(s);
-:};
+item ::= LINE_COMMENT:s {: System.out.println(s); :};
+item ::= BLOCK_COMMENT:s {: System.out.println(s); :};
 
 // TAGS
-item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
-	System.out.println();
-:};
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: System.out.println(); :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {::};
 
-item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
-	System.out.println();
-:};
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: System.out.println(); :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {::};
 
 // CLASSES
-item ::= ECLAIRAGE {: 
- currentClass = "CEclairage";
-:};
+item ::= ECLAIRAGE:n {: setClass("CEclairage", (String) n); :};
+item ::= VOLET:n {: setClass("CVoletFenetre", (String) n); :};
+item ::= CHAUFFAGE:n {: setClass("CChauffage", (String) n); :};
+item ::= ALARME:n {: setClass("CAlarme", (String) n); :};
+item ::= FENETRE:n {: setClass("CVoletFenetre", (String) n); :};
+item ::= AUTRE_APPAREIL:n {: setClass("CAutreAppareil", (String) n); :};
 
-item ::= VOLET {: 
- currentClass = "CVoletFenetre";
-:};
-
-item ::= CHAUFFAGE {: 
- currentClass = "CChauffage";
-:};
-
-item ::= ALARME {: 
- currentClass = "CAlarme";
-:};
-
-item ::= FENETRE {: 
- currentClass = "CVoletFenetre";
-:};
-
-item ::= CAFETIERE {::};
-item ::= HIFI {::};
-
-item ::= AUTRE_APPAREIL {: 
- currentClass = "CAutreAppareil";
-:};
+item ::= CAFETIERE {: typeClass += "_CAFE"; :};
+item ::= HIFI {: typeClass += "_HIFI"; :};
 
 // OTHER STUFF
 item ::= COMMA {: :};
@@ -123,10 +128,10 @@ item ::= DEFINIR {:
 
 item ::= IDENTIFIER:s {:
 	if(currentClass != "") {
-		System.out.print(currentClass + " ");
-		System.out.print(s + " = new " + currentClass);
-		System.out.println("(\"" + s + "\", TYPE_APPAREIL." + currentClass + ");");
-		System.out.println("ma_liste_appareils.add(" + s + ");");
+		append(currentClass + " ");
+		append(s + " = new " + currentClass);
+		appendln("(\"" + s + "\", " + typeClass + ");");
+		appendln("ma_liste_appareils.add(" + s + ");");
 	}
 :};
 
