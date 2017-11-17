@@ -15,16 +15,29 @@ parser code {:
 action code {:
 	static final String TYPE_APPAREIL = "TypeAppareil";
 
-	Stack<String> stack = new Stack();
+	Stack<Token> stack = new Stack();
 	// Gets cleared after each statement
 	Stack<String> identifierStack = new Stack();
 	boolean programme_domus = false;
 	String currentClass;
 	String typeClass;
 
-	public void setClass(String className, String classType) {
-		currentClass = className;
-		typeClass = TYPE_APPAREIL + "." + classType.toUpperCase();
+	public class Token {
+		private String name;
+		private String value;
+
+		public Token(String name, String value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
 	}
 
 	static final String FILE_NAME = "CMaisonUser.java";
@@ -84,128 +97,147 @@ item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
 		throw new Exception("DOMUS program should start with PROGRAMME_DOMUS_OPEN_TAG");
 	}
 
-	stack.push("PROGRAMME_DOMUS_OPEN_TAG");
+	stack.push(new Token("PROGRAMME_DOMUS_OPEN_TAG", null));
 	createFile();
 :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-	if(stack.isEmpty() || stack.pop() != "PROGRAMME_DOMUS_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "PROGRAMME_DOMUS_OPEN_TAG") {
 		throw new Exception("Missing PROGRAMME_DOMUS_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
 	System.out.println();
-	stack.push("DECLARATION_APPAREILS_OPEN_TAG");
+	stack.push(new Token("DECLARATION_APPAREILS_OPEN_TAG", null));
 :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_APPAREILS_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_APPAREILS_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_APPAREILS_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
 	System.out.println();
-	stack.push("DECLARATION_INTERFACE_OPEN_TAG");
+	stack.push(new Token("DECLARATION_INTERFACE_OPEN_TAG", null));
 :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_INTERFACE_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_INTERFACE_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_INTERFACE_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
 	System.out.println();
-	stack.push("DECLARATION_SCENARII_OPEN_TAG");
+	stack.push(new Token("DECLARATION_SCENARII_OPEN_TAG", null));
 :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_SCENARII_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_SCENARII_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_SCENARII_OPEN_TAG");
 	}
 :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
 	System.out.println();
-	stack.push("SCENARIO_OPEN_TAG");
+	stack.push(new Token("SCENARIO_OPEN_TAG", null));
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "SCENARIO_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "SCENARIO_OPEN_TAG") {
 		throw new Exception("Missing SCENARIO_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
 	System.out.println();
-	stack.push("DECLARATION_COMMANDES_OPEN_TAG");
+	stack.push(new Token("DECLARATION_COMMANDES_OPEN_TAG", null));
 :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_COMMANDES_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_COMMANDES_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_COMMANDES_OPEN_TAG");
 	}
 :};
 
 // PUNCTUATIONS
 item ::= COMMA {:
-	identifierStack.pop();
+	stack.pop();
 :};
-item ::= DOT {: currentClass = ""; typeClass = ""; identifierStack.clear(); :};
+item ::= DOT {: stack.pop(); :};
 item ::= ASSIGN {::};
 
 item ::= CURLY_BRACKET_OPEN {:
-	stack.push("{");
+	stack.push(new Token("{", null));
 :};
 item ::= CURLY_BRACKET_CLOSE {:
-	if(stack.isEmpty() || stack.pop() != "{") {
+	if(stack.isEmpty() || stack.pop().getName() != "{") {
 		throw new Exception("Missing curly bracket {");
 	}
 :};
 
 item ::= PARANTHESES_OPEN {:
-	stack.push("(");
+	stack.push(new Token("(", null));
 :};
 item ::= PARANTHESES_CLOSE {:
-	if(stack.isEmpty() || stack.pop() != "(") {
+	if(stack.isEmpty() || stack.pop().getName() != "(") {
 		throw new Exception("Missing paranthese (");
 	}
 :};
 
 // CLASSES
-item ::= ECLAIRAGE:n {: setClass("CEclairage", (String) n); :};
-item ::= VOLET:n {: setClass("CVoletFenetre", (String) n); :};
-item ::= CHAUFFAGE:n {: setClass("CChauffage", (String) n); :};
-item ::= ALARME:n {: setClass("CAlarme", (String) n); :};
-item ::= FENETRE:n {: setClass("CVoletFenetre", (String) n); :};
-item ::= AUTRE_APPAREIL:n {: setClass("CAutreAppareil", (String) n); :};
+item ::= ECLAIRAGE:n {:
+	stack.push(new Token("CEclairage", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
+item ::= VOLET:n {:
+	stack.push(new Token("CVoletFenetre", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
+item ::= CHAUFFAGE:n {:
+	stack.push(new Token("CChauffage", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
+item ::= ALARME:n {:
+	stack.push(new Token("CAlarme", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
+item ::= FENETRE:n {:
+	stack.push(new Token("CVoletFenetre", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
+item ::= AUTRE_APPAREIL:n {:
+	stack.push(new Token("CAutreAppareil", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+:};
 
-item ::= CAFETIERE {: typeClass += "_CAFE"; :};
-item ::= HIFI {: typeClass += "_HIFI"; :};
+item ::= CAFETIERE {:
+	// typeClass += "_CAFE";
+:};
+item ::= HIFI {:
+	// typeClass += "_HIFI";
+:};
 
 
 
 // keys
 item ::= DEFINIR {:
 	if(stack.contains("DECLARATION_APPAREILS_OPEN_TAG")) {
-		currentClass = "CEnsAppareil";
+		stack.push(new Token("CEnsAppareil", null));
 	}
 :};
 
 
 item ::= IDENTIFIER:s {:
-	identifierStack.push(s);
+	Token t = stack.peek();
+	stack.push(new Token(s, null));
+
+	append(t.getName() + " " + s + " = new " + t.getName());
+	appendln("(\"" + s + "\", " + t.getValue() + ");");
+	appendln("ma_liste_appareils.add(" + s + ");");
+	// identifierStack.push(s);
 	
-	if(currentClass != "") {
-		if(identifierStack.size() < 2) {
-			append(currentClass + " " + s + " = new " + currentClass);
-		}
+	// if(currentClass != "") {
+	// 	if(identifierStack.size() < 2) {
+	// 		append(currentClass + " " + s + " = new " + currentClass);
+	// 	}
 
-		if(currentClass == "CEnsAppareil") {
-			appendln(identifierStack.get(0) + ".addAppareil(" + s + ");");
-		} else {
-			appendln("(\"" + s + "\", " + typeClass + ");");
-		}
-
-		if(identifierStack.get(0) == s) {
-			appendln("ma_liste_appareils.add(" + identifierStack.get(0) + ");");
-		}
-	}
+	// 	if(currentClass == "CEnsAppareil") {
+	// 		appendln(identifierStack.get(0) + ".addAppareil(" + s + ");");
+	// 	} else {
+			// appendln("(\"" + s + "\", " + typeClass + ");");
+			// appendln("ma_liste_appareils.add(" + identifierStack.get(0) + ");");
+	// 	}
+	// }
 :};
 
