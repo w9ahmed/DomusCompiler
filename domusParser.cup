@@ -51,61 +51,60 @@ item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
 		throw new Exception("DOMUS program should start with PROGRAMME_DOMUS_OPEN_TAG");
 	}
 
-	stack.push(new Token("PROGRAMME_DOMUS_OPEN_TAG", null));
+	stack.push(new Token("PROGRAMME_DOMUS_OPEN_TAG", Type._TAG));
 	writer.createFile();
 :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-	if(stack.isEmpty() || stack.pop().getName() != "PROGRAMME_DOMUS_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "PROGRAMME_DOMUS_OPEN_TAG") {
 		throw new Exception("Missing PROGRAMME_DOMUS_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
-	System.out.println();
-	stack.push(new Token("DECLARATION_APPAREILS_OPEN_TAG", null));
+	stack.push(new Token("DECLARATION_APPAREILS_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_APPAREILS_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_APPAREILS_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_APPAREILS_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
 	System.out.println();
-	stack.push(new Token("DECLARATION_INTERFACE_OPEN_TAG", null));
+	stack.push(new Token("DECLARATION_INTERFACE_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_INTERFACE_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_INTERFACE_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_INTERFACE_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
 	System.out.println();
-	stack.push(new Token("DECLARATION_SCENARII_OPEN_TAG", null));
+	stack.push(new Token("DECLARATION_SCENARII_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_SCENARII_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_SCENARII_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_SCENARII_OPEN_TAG");
 	}
 :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
 	System.out.println();
-	stack.push(new Token("SCENARIO_OPEN_TAG", null));
+	stack.push(new Token("SCENARIO_OPEN_TAG", Type._TAG));
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getName() != "SCENARIO_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "SCENARIO_OPEN_TAG") {
 		throw new Exception("Missing SCENARIO_OPEN_TAG");
 	}
 :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
 	System.out.println();
-	stack.push(new Token("DECLARATION_COMMANDES_OPEN_TAG", null));
+	stack.push(new Token("DECLARATION_COMMANDES_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getName() != "DECLARATION_COMMANDES_OPEN_TAG") {
+	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_COMMANDES_OPEN_TAG") {
 		throw new Exception("Missing DECLARATION_COMMANDES_OPEN_TAG");
 	}
 :};
@@ -118,48 +117,60 @@ item ::= DOT {: stack.pop(); :};
 item ::= ASSIGN {::};
 
 item ::= CURLY_BRACKET_OPEN {:
-	stack.push(new Token("{", null));
+	stack.push(new Token("{", Type._PUNC));
 :};
 item ::= CURLY_BRACKET_CLOSE {:
-	if(stack.isEmpty() || stack.pop().getName() != "{") {
+	if(stack.isEmpty() || stack.pop().getValue() != "{") {
 		throw new Exception("Missing curly bracket {");
 	}
 :};
 
 item ::= PARANTHESES_OPEN {:
-	stack.push(new Token("(", null));
+	stack.push(new Token("(", Type._PUNC));
 :};
 item ::= PARANTHESES_CLOSE {:
-	if(stack.isEmpty() || stack.pop().getName() != "(") {
+	if(stack.isEmpty() || stack.pop().getValue() != "(") {
 		throw new Exception("Missing paranthese (");
 	}
 :};
 
 // CLASSES
 item ::= ECLAIRAGE:n {:
-	stack.push(new Token("CEclairage", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CEclairage", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 item ::= VOLET:n {:
-	stack.push(new Token("CVoletFenetre", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CVoletFenetre", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 item ::= CHAUFFAGE:n {:
-	stack.push(new Token("CChauffage", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CChauffage", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 item ::= ALARME:n {:
-	stack.push(new Token("CAlarme", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CAlarme", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 item ::= FENETRE:n {:
-	stack.push(new Token("CVoletFenetre", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CVoletFenetre", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 item ::= AUTRE_APPAREIL:n {:
-	stack.push(new Token("CAutreAppareil", "TYPE_APPAREIL." + ((String) n).toUpperCase()));
+	stack.push(new Token("CAutreAppareil", Type._CLASS));
+	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
 :};
 
 item ::= CAFETIERE {:
-	// typeClass += "_CAFE";
+	// Token paran = stack.pop();
+	// Token autreAppareil = stack.pop();
+	// stack.push(new Token(autreAppareil.getValue(), autreAppareil.getValue() + "_CAFE"));
+	// stack.push(paran);
 :};
 item ::= HIFI {:
-	// typeClass += "_HIFI";
+	// Token paran = stack.pop();
+	// Token autreAppareil = stack.pop();
+	// stack.push(new Token(autreAppareil.getValue(), autreAppareil.getValue() + "_HIFI"));
+	// stack.push(paran);
 :};
 
 
@@ -167,19 +178,24 @@ item ::= HIFI {:
 // keys
 item ::= DEFINIR {:
 	if(stack.contains("DECLARATION_APPAREILS_OPEN_TAG")) {
-		stack.push(new Token("CEnsAppareil", null));
+		stack.push(new Token("CEnsAppareil", Type._ENS));
 	}
 :};
 
 
 item ::= IDENTIFIER:s {:
-	Token t = stack.peek();
-	stack.push(new Token(s, null));
+	Token classType = stack.pop();
+	Token className = stack.pop();
 
-	writer.append(t.getName() + " " + s + " = new " + t.getName());
-	writer.appendln("(\"" + s + "\", " + t.getValue() + ");");
+	writer.append(className.getValue() + " " + s + " = new " + className.getValue());
+	writer.appendln("(\"" + s + "\", " + classType.getValue() + ");");
 	writer.appendln("ma_liste_appareils.add(" + s + ");");
-	// identifierStack.push(s);
+
+	stack.push(className);
+	stack.push(classType);
+
+	// REFACTOR
+	stack.push(new Token(null, null));
 	
 	// if(currentClass != "") {
 	// 	if(identifierStack.size() < 2) {

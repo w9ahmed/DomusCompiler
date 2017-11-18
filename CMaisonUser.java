@@ -29,7 +29,7 @@ ma_liste_appareils.add(hf);
 // Decleration ensemble appareils
 CAutreAppareil mon_eclairage_salon = new CAutreAppareil("mon_eclairage_salon", TYPE_APPAREIL.AUTRE_APPAREIL);
 ma_liste_appareils.add(mon_eclairage_salon);
-{ e2 = new {("e2", null);
+null e2 = new null("e2", {);
 ma_liste_appareils.add(e2);
-{ e3 = new {("e3", null);
+null e3 = new null("e3", {);
 ma_liste_appareils.add(e3);
