@@ -1,6 +1,5 @@
 import java_cup.runtime.*;
 import java.util.Stack;
-import java.io.*;
 
 parser code {:
 	public static void main(String args[]) throws Exception {
@@ -13,53 +12,8 @@ parser code {:
 :}
 
 action code {:
-	static final String TYPE_APPAREIL = "TypeAppareil";
-
 	Stack<Token> stack = new Stack();
-	// Gets cleared after each statement
-	Stack<String> identifierStack = new Stack();
-	boolean programme_domus = false;
-	String currentClass;
-	String typeClass;
-
-	public class Token {
-		private String name;
-		private String value;
-
-		public Token(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
-
-		public String getName() {
-			return this.name;
-		}
-
-		public String getValue() {
-			return this.value;
-		}
-	}
-
-	static final String FILE_NAME = "CMaisonUser.java";
-
-	public void createFile() throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME));
-		writer.write("");
-		writer.close();
-	}
-
-	public void append(String text) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
-		writer.append(text);
-		writer.close();
-	}
-
-	public void appendln(String text) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
-		writer.append(text);
-		writer.append("\n");
-		writer.close();
-	}
+	Writer writer = new Writer("CMaisonUser.java");
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -88,8 +42,8 @@ expr	::= list {:
 list ::= item list | item;
 
 // COMMENTS
-item ::= LINE_COMMENT:s {: appendln(s); :};
-item ::= BLOCK_COMMENT:s {: appendln(s); :};
+item ::= LINE_COMMENT:s {: writer.appendln(s); :};
+item ::= BLOCK_COMMENT:s {: writer.appendln(s); :};
 
 // TAGS
 item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
@@ -98,7 +52,7 @@ item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
 	}
 
 	stack.push(new Token("PROGRAMME_DOMUS_OPEN_TAG", null));
-	createFile();
+	writer.createFile();
 :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
 	if(stack.isEmpty() || stack.pop().getName() != "PROGRAMME_DOMUS_OPEN_TAG") {
@@ -222,9 +176,9 @@ item ::= IDENTIFIER:s {:
 	Token t = stack.peek();
 	stack.push(new Token(s, null));
 
-	append(t.getName() + " " + s + " = new " + t.getName());
-	appendln("(\"" + s + "\", " + t.getValue() + ");");
-	appendln("ma_liste_appareils.add(" + s + ");");
+	writer.append(t.getName() + " " + s + " = new " + t.getName());
+	writer.appendln("(\"" + s + "\", " + t.getValue() + ");");
+	writer.appendln("ma_liste_appareils.add(" + s + ");");
 	// identifierStack.push(s);
 	
 	// if(currentClass != "") {
