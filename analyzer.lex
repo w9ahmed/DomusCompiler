@@ -60,10 +60,11 @@ import java_cup.runtime.Symbol;
 "fenetre" { return new Symbol(sym.FENETRE, new String(yytext())); }
 "autre_appareil" { return new Symbol(sym.AUTRE_APPAREIL, new String(yytext())); }
 
-"interrupteur" { return new Symbol(sym.INTERRUPTEUR); }
-"mobile" { return new Symbol(sym.MOBILE); }
-"telephone" { return new Symbol(sym.TELEPHONE); }
-"telecommande" { return new Symbol(sym.TELECOMMANDE); }
+"interrupteur" { return new Symbol(sym.INTERRUPTEUR, new String(yytext())); }
+"mobile" { return new Symbol(sym.MOBILE, new String(yytext())); }
+"telephone" { return new Symbol(sym.TELEPHONE, new String(yytext())); }
+"telecommande" { return new Symbol(sym.TELECOMMANDE, new String(yytext())); }
+
 "tablette" { return new Symbol(sym.TABLETTE); }
 "tv" { return new Symbol(sym.TV); }
 "hifi" { return new Symbol(sym.HIFI); }

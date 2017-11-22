@@ -1,12 +1,12 @@
 CEclairage e1 = new CEclairage("e1", TypeAppareil.ECLAIRAGE);
 ma_liste_appareils.add(e1);
-CVoletFenetre v1 = new CVoletFenetre("v1", TypeAppareil.VOLET);
+CVolet v1 = new CVolet("v1", TypeAppareil.VOLET);
 ma_liste_appareils.add(v1);
 CChauffage rad1 = new CChauffage("rad1", TypeAppareil.CHAUFFAGE);
 ma_liste_appareils.add(rad1);
 CAlarme a1 = new CAlarme("a1", TypeAppareil.ALARME);
 ma_liste_appareils.add(a1);
-CVolet fen = new CVolet("fen", TypeAppareil.FENETRE);
+CFenetre fen = new CFenetre("fen", TypeAppareil.FENETRE);
 ma_liste_appareils.add(fen);
 CAutreAppareil cafe = new CAutreAppareil("cafe", TypeAppareil.AUTRE_APPAREIL_CAFE);
 ma_liste_appareils.add(cafe);
