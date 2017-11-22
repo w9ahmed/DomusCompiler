@@ -37,15 +37,17 @@ import java_cup.runtime.Symbol;
 "alors" { return new Symbol(sym.ALORS); }
 "sinon" { return new Symbol(sym.SINON); }
 "fsi" { return new Symbol(sym.FSI); }
-"ouverir" { return new Symbol(sym.OUVERIR); }
-"fermer" { return new Symbol(sym.FERMER); }
-"eteindre" { return new Symbol(sym.ETEINDRE); }
-"allumer" { return new Symbol(sym.ALLUMER); }
-"tamiser" { return new Symbol(sym.TASMISER); }
+
+"ouverir" { return new Symbol(sym.OUVERIR, new String(yytext())); }
+"fermer" { return new Symbol(sym.FERMER, new String(yytext())); }
+"eteindre" { return new Symbol(sym.ETEINDRE, new String(yytext())); }
+"allumer" { return new Symbol(sym.ALLUMER, new String(yytext())); }
+"tamiser" { return new Symbol(sym.TAMISER, new String(yytext())); }
+"allumer_partiel" { return new Symbol(sym.ALLUMER_PARTIEL, new String(yytext())); }
+"allumer_eco" { return new Symbol(sym.ALLUMER_ECO, new String(yytext())); }
+"ouverir_partiel" { return new Symbol(sym.OUVERIR_PARTIEL, new String(yytext())); }
+
 "etat" { return new Symbol(sym.ETAT); }
-"allumer_partiel" { return new Symbol(sym.ALLUMER_PARTIEL); }
-"allumer_eco" { return new Symbol(sym.ALLUMER_ECO); }
-"ouverir_partiel" { return new Symbol(sym.OUVERIR_PARTIEL); }
 "allume" { return new Symbol(sym.ALLUME); }
 "etein" { return new Symbol(sym.ETEIN); }
 "demi" { return new Symbol(sym.DEMI); }

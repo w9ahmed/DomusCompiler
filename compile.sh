@@ -3,7 +3,7 @@ echo 'Compiling...'
 
 LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
-TESTFILE="butest.domus"
+TESTFILE="test.domus"
 
 SEPERATOR="\n\n\n"
 DELETE="\t\e[31mDeleting\e[39m"
@@ -60,7 +60,7 @@ echo -e '\e[34mRunning parser on file:\e[39m' $TESTFILE
 echo -e $SEPERATOR
 java parser < $TESTFILE
 
-if [ -f CMaisonUser.java ]
-then
-		code CMaisonUser.java
-fi
+# if [ -f CMaisonUser.java ]
+# then
+# 		# code CMaisonUser.java
+# fi

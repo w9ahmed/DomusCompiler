@@ -23,7 +23,7 @@ terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
  
  DEFINIR, EXECUTOR_SCENARIO, ASSOCIER, PROGRAMMER, MESSAGE, POURTOUT,
  FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVERIR, FERMER, ETEINDRE, ALLUMER,
- TASMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVERIR_PARTIEL, ALLUME, ETEIN,
+ TAMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVERIR_PARTIEL, ALLUME, ETEIN,
  DEMI, ECO, OUVERT, FERME, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
  LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL,
 
@@ -36,7 +36,7 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
-non terminal appareils, autre_appareils, interfaces;
+non terminal appareils, autre_appareils, interfaces, actions;
 
 expr ::= list {:
 	System.out.println("\n\nAnalyse terminee!");
@@ -49,74 +49,61 @@ item ::= LINE_COMMENT:s {: writer.appendln(s); :};
 item ::= BLOCK_COMMENT:s {: writer.appendln(s); :};
 
 // TAGS
-item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
-	writer.createFile();
-:};
-item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-:};
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: writer.createFile(); :};
+item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
-:};
-item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
-:};
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: :};
+item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
-:};
-item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
-:};
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: :};
+item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
-:};
-item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
-:};
+item ::= DECLARATION_SCENARII_OPEN_TAG:s {: :};
+item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
-item ::= SCENARIO_OPEN_TAG:s {:
-:};
-item ::= SCENARIO_CLOSE_TAG:s {:
-:};
+item ::= SCENARIO_OPEN_TAG:s {: :};
+item ::= SCENARIO_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
-:};
-item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
-:};
-
-// PUNCTUATIONS
-// item ::= COMMA {:  :};
-// item ::= DOT {: :};
-// item ::= ASSIGN {::};
-
-// item ::= CURLY_BRACKET_OPEN {:
-// 	stack.push(new Token("{", Type._PUNC));
-// :};
-// item ::= CURLY_BRACKET_CLOSE {:
-// 	if(stack.isEmpty() || stack.pop().getValue() != "{") {
-// 		throw new Exception("Missing curly bracket {");
-// 	}
-// :};
-
-// item ::= PARANTHESES_OPEN {:
-// :};
-// item ::= PARANTHESES_CLOSE {:
-// :};
+item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
+item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {: :};
 
 appareils ::= 
-	ECLAIRAGE:a {: RESULT = a; :} 
+	  ECLAIRAGE:a {: RESULT = a; :} 
 	| VOLET:a {: RESULT = a; :}
 	| CHAUFFAGE:a {: RESULT = a; :}
 	| ALARME:a {: RESULT = a; :}
 	| FENETRE:a {: RESULT = a; :};
 
 autre_appareils ::= 
-	CAFETIERE:ap {: RESULT = "cafe"; :}
+	  CAFETIERE:ap {: RESULT = "cafe"; :}
 	| HIFI:ap {: RESULT = "hifi"; :};
 
 interfaces ::= 
-	INTERRUPTEUR:i {: RESULT = i; :}
+	  INTERRUPTEUR:i {: RESULT = i; :}
 	| MOBILE:i {: RESULT = i; :}
 	| TELEPHONE:i {: RESULT = i; :}
 	| TELECOMMANDE:i {: RESULT = i; :};
 
-item ::= appareils:a IDENTIFIER:identifier DOT {:
+actions ::=
+      OUVERIR:a {: RESULT = a; :}
+	| FERMER:a {: RESULT = a; :} 
+	| ETEINDRE:a {: RESULT = a; :} 
+	| ALLUMER :a {: RESULT = a; :}
+	| TAMISER:a {: RESULT = a; :}
+	| ALLUMER_PARTIEL:a {: RESULT = a; :}
+	| ALLUMER_ECO:a {: RESULT = a; :}
+	| OUVERIR_PARTIEL:a {: RESULT = a; :};
+
+subitem ::=
+	  COMMA IDENTIFIER:identifier subitem:a
+	  {:
+		RESULT = identifier;
+	  :}
+	| CURLY_BRACKET_CLOSE DOT {::}
+	| DOT {::};
+
+item ::= appareils:a IDENTIFIER:identifier subitem:si {:
+	System.out.println(si);
 	// TODO Update class name for VOLET to FENETRE
 	String appareils = (String) a;
 	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
@@ -124,27 +111,31 @@ item ::= appareils:a IDENTIFIER:identifier DOT {:
 	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
 
-item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE IDENTIFIER:identifier DOT {:
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE IDENTIFIER:identifier subitem:si {:
 	String appareils = (String) ap;
 	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
 	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
 
-subitem ::= COMMA IDENTIFIER:i subitem 
-| COMMA IDENTIFIER:i {:
-	System.out.println(i);
-	RESULT = i;
-:};
 
-item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:identifier2 CURLY_BRACKET_CLOSE DOT {:
+item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:identifier2 subitem:si {:
 	writer.appendln("CEnsAppareil " + identifier1 + " = new CAutreAppareil(\"" + identifier1 + "\");");
 	writer.appendln(identifier1 + ".add(" + identifier2 + ");");
 	writer.appendln("ma_liste_ens_appareils.add(" + identifier1 + ");");
 :};
 
-item ::= interfaces:i IDENTIFIER:identifier DOT {:
+item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
 	String interfaceName = (String) i;
 	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
 	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
 :};
 
+
+// IDENTIFIER DOT =>> Action sub item
+item ::= POURTOUT IDENTIFIER:id1 COLON IDENTIFIER:id2 FAIRE item:app_action FAIT SEMI_COLON {::};
+item ::= IDENTIFIER:id DOT actions:a SEMI_COLON {:
+	System.out.println(id);
+	System.out.println(a);
+:};
+item ::= SI PARANTHESES_OPEN item EQUALS item PARANTHESES_CLOSE {::};
+// item ::= ALORS item FSI
