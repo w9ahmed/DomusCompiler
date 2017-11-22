@@ -1,0 +1,13 @@
+eclairage e1.
+volet v1.
+chauffage rad1.
+alarme a1.
+fenetre fen.
+autre_appareil(cafetiere) cafe.
+autre_appareil(hifi) hf.
+definir mon_eclairage_salon = {e2}.
+
+// Something else
+interrupteur b1.
+mobile t1.
+telecommande c1.

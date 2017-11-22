@@ -3,7 +3,7 @@ echo 'Compiling...'
 
 LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
-TESTFILE="test.domus"
+TESTFILE="butest.domus"
 
 SEPERATOR="\n\n\n"
 DELETE="\t\e[31mDeleting\e[39m"

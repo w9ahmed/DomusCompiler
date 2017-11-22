@@ -12,7 +12,6 @@ parser code {:
 :}
 
 action code {:
-	Stack<Token> stack = new Stack();
 	Writer writer = new Writer("CMaisonUser.java");
 :}
 
@@ -33,9 +32,10 @@ terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
 
 terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT;
 
-non terminal expr, list, item;
+non terminal expr, list, item, subitem;
+non terminal appareils;
 
-expr	::= list {:
+expr ::= list {:
 	System.out.println("\n\nAnalyse terminee!");
 :} | {: System.out.println("Entree vide!"); :};
 
@@ -47,167 +47,114 @@ item ::= BLOCK_COMMENT:s {: writer.appendln(s); :};
 
 // TAGS
 item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
-	if(!stack.isEmpty()) {
-		throw new Exception("DOMUS program should start with PROGRAMME_DOMUS_OPEN_TAG");
-	}
-
-	stack.push(new Token("PROGRAMME_DOMUS_OPEN_TAG", Type._TAG));
 	writer.createFile();
 :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-	if(stack.isEmpty() || stack.pop().getValue() != "PROGRAMME_DOMUS_OPEN_TAG") {
-		throw new Exception("Missing PROGRAMME_DOMUS_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
-	stack.push(new Token("DECLARATION_APPAREILS_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_APPAREILS_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_APPAREILS_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
-	System.out.println();
-	stack.push(new Token("DECLARATION_INTERFACE_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_INTERFACE_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_INTERFACE_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
-	System.out.println();
-	stack.push(new Token("DECLARATION_SCENARII_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_SCENARII_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_SCENARII_OPEN_TAG");
-	}
 :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
-	System.out.println();
-	stack.push(new Token("SCENARIO_OPEN_TAG", Type._TAG));
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getValue() != "SCENARIO_OPEN_TAG") {
-		throw new Exception("Missing SCENARIO_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
-	System.out.println();
-	stack.push(new Token("DECLARATION_COMMANDES_OPEN_TAG", Type._TAG));
 :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop().getValue() != "DECLARATION_COMMANDES_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_COMMANDES_OPEN_TAG");
-	}
 :};
 
 // PUNCTUATIONS
-item ::= COMMA {:
-	stack.pop();
-:};
-item ::= DOT {: stack.pop(); :};
-item ::= ASSIGN {::};
+// item ::= COMMA {:  :};
+// item ::= DOT {: :};
+// item ::= ASSIGN {::};
 
-item ::= CURLY_BRACKET_OPEN {:
-	stack.push(new Token("{", Type._PUNC));
-:};
-item ::= CURLY_BRACKET_CLOSE {:
-	if(stack.isEmpty() || stack.pop().getValue() != "{") {
-		throw new Exception("Missing curly bracket {");
-	}
-:};
+// item ::= CURLY_BRACKET_OPEN {:
+// 	stack.push(new Token("{", Type._PUNC));
+// :};
+// item ::= CURLY_BRACKET_CLOSE {:
+// 	if(stack.isEmpty() || stack.pop().getValue() != "{") {
+// 		throw new Exception("Missing curly bracket {");
+// 	}
+// :};
 
-item ::= PARANTHESES_OPEN {:
-	stack.push(new Token("(", Type._PUNC));
-:};
-item ::= PARANTHESES_CLOSE {:
-	if(stack.isEmpty() || stack.pop().getValue() != "(") {
-		throw new Exception("Missing paranthese (");
-	}
-:};
+// item ::= PARANTHESES_OPEN {:
+// :};
+// item ::= PARANTHESES_CLOSE {:
+// :};
 
 // CLASSES
-item ::= ECLAIRAGE:n {:
-	stack.push(new Token("CEclairage", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
-:};
-item ::= VOLET:n {:
-	stack.push(new Token("CVoletFenetre", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
-:};
-item ::= CHAUFFAGE:n {:
-	stack.push(new Token("CChauffage", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
-:};
-item ::= ALARME:n {:
-	stack.push(new Token("CAlarme", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
-:};
-item ::= FENETRE:n {:
-	stack.push(new Token("CVoletFenetre", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
-:};
-item ::= AUTRE_APPAREIL:n {:
-	stack.push(new Token("CAutreAppareil", Type._CLASS));
-	stack.push(new Token("TYPE_APPAREIL." + ((String) n).toUpperCase(), Type._APPAREIL));
+appareils ::= ECLAIRAGE | VOLET | CHAUFFAGE | ALARME | FENETRE {::};
+item ::= ECLAIRAGE IDENTIFIER:identifier  DOT {:
+	writer.appendln("CEclairage " + identifier + " = new CEclairage(\"" + identifier + "\", TypeAppareil.ECLAIRAGE);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
 
+item ::= VOLET IDENTIFIER:identifier  DOT {:
+	writer.appendln("CVoletFenetre " + identifier + " = new CVoletFenetre(\"" + identifier + "\", TypeAppareil.VOLET);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
+item ::= CHAUFFAGE IDENTIFIER:identifier  DOT {:
+	writer.appendln("CChauffage " + identifier + " = new CChauffage(\"" + identifier + "\", TypeAppareil.CHAUFFAGE);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
+item ::= ALARME IDENTIFIER:identifier  DOT {:
+	writer.appendln("CAlarme " + identifier + " = new CAlarme(\"" + identifier + "\", TypeAppareil.ALARME);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
+item ::= FENETRE IDENTIFIER:identifier  DOT {:
+	writer.appendln("CVolet " + identifier + " = new CVolet(\"" + identifier + "\", TypeAppareil.FENETRE);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN CAFETIERE:cafetiere PARANTHESES_CLOSE IDENTIFIER:identifier DOT {:
+	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_CAFE);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN HIFI:hifi PARANTHESES_CLOSE IDENTIFIER:identifier DOT {:
+	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_HIFI);");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+:};
 item ::= CAFETIERE {:
-	// Token paran = stack.pop();
-	// Token autreAppareil = stack.pop();
-	// stack.push(new Token(autreAppareil.getValue(), autreAppareil.getValue() + "_CAFE"));
-	// stack.push(paran);
+	RESULT = "cafe";
 :};
 item ::= HIFI {:
-	// Token paran = stack.pop();
-	// Token autreAppareil = stack.pop();
-	// stack.push(new Token(autreAppareil.getValue(), autreAppareil.getValue() + "_HIFI"));
-	// stack.push(paran);
+	RESULT = "hf";
+:};
+subitem ::= COMMA IDENTIFIER:i subitem | COMMA IDENTIFIER:i {:
+	System.out.println(i);
+	RESULT = i;
 :};
 
-
-
-// keys
-item ::= DEFINIR {:
-	if(stack.contains("DECLARATION_APPAREILS_OPEN_TAG")) {
-		stack.push(new Token("CEnsAppareil", Type._ENS));
-	}
+// definir mon_eclairage_salon = {e2,e3}.
+item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:identifier2 CURLY_BRACKET_CLOSE DOT {:
+	writer.appendln("CEnsAppareil " + identifier1 + " = new CAutreAppareil(\"" + identifier1 + "\");");
+	writer.appendln(identifier1 + ".add(" + identifier2 + ");");
+	writer.appendln("ma_liste_ens_appareils.add(" + identifier1 + ");");
 :};
 
-
-item ::= IDENTIFIER:s {:
-	Token classType = stack.pop();
-	Token className = stack.pop();
-
-	writer.append(className.getValue() + " " + s + " = new " + className.getValue());
-	writer.appendln("(\"" + s + "\", " + classType.getValue() + ");");
-	writer.appendln("ma_liste_appareils.add(" + s + ");");
-
-	stack.push(className);
-	stack.push(classType);
-
-	// REFACTOR
-	stack.push(new Token(null, null));
-	
-	// if(currentClass != "") {
-	// 	if(identifierStack.size() < 2) {
-	// 		append(currentClass + " " + s + " = new " + currentClass);
-	// 	}
-
-	// 	if(currentClass == "CEnsAppareil") {
-	// 		appendln(identifierStack.get(0) + ".addAppareil(" + s + ");");
-	// 	} else {
-			// appendln("(\"" + s + "\", " + typeClass + ");");
-			// appendln("ma_liste_appareils.add(" + identifierStack.get(0) + ");");
-	// 	}
-	// }
+item ::= INTERRUPTEUR IDENTIFIER:identifier  DOT {:
+	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface.INTERRUPTEUR);");
+	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
+:};
+item ::= MOBILE IDENTIFIER:identifier  DOT {:
+	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface.MOBILE);");
+	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
+:};
+item ::= TELECOMMANDE IDENTIFIER:identifier  DOT {:
+	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface.TELECOMMANDE);");
+	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
 :};
 
