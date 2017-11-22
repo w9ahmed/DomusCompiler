@@ -1,6 +1,5 @@
 import java_cup.runtime.*;
 import java.util.Stack;
-import java.io.*;
 
 parser code {:
 	public static void main(String args[]) throws Exception {
@@ -13,40 +12,7 @@ parser code {:
 :}
 
 action code {:
-	static final String TYPE_APPAREIL = "TypeAppareil";
-
-	Stack<String> stack = new Stack();
-	// Gets cleared after each statement
-	Stack<String> identifierStack = new Stack();
-	boolean programme_domus = false;
-	String currentClass;
-	String typeClass;
-
-	public void setClass(String className, String classType) {
-		currentClass = className;
-		typeClass = TYPE_APPAREIL + "." + classType.toUpperCase();
-	}
-
-	static final String FILE_NAME = "CMaisonUser.java";
-
-	public void createFile() throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME));
-		writer.write("");
-		writer.close();
-	}
-
-	public void append(String text) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
-		writer.append(text);
-		writer.close();
-	}
-
-	public void appendln(String text) throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME, true));
-		writer.append(text);
-		writer.append("\n");
-		writer.close();
-	}
+	Writer writer = new Writer("CMaisonUser.java");
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -58,154 +24,127 @@ terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
  DEFINIR, EXECUTOR_SCENARIO, ASSOCIER, PROGRAMMER, MESSAGE, POURTOUT,
  FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVERIR, FERMER, ETEINDRE, ALLUMER,
  TASMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVERIR_PARTIEL, ALLUME, ETEIN,
- DEMI, ECO, OUVERT, FERME, ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL,
- INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
+ DEMI, ECO, OUVERT, FERME, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
  LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL,
 
  DOT, COMMA, COLON, ASSIGN, SEMI_COLON, CURLY_BRACKET_OPEN, CURLY_BRACKET_CLOSE, EQUALS, PARANTHESES_OPEN, PARANTHESES_CLOSE;
 
 terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT;
+// appareils
+terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
+// interface
+terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
-non terminal expr, list, item;
+non terminal expr, list, item, subitem;
+non terminal appareils, autre_appareils, interfaces;
 
-expr	::= list {:
+expr ::= list {:
 	System.out.println("\n\nAnalyse terminee!");
 :} | {: System.out.println("Entree vide!"); :};
 
 list ::= item list | item;
 
 // COMMENTS
-item ::= LINE_COMMENT:s {: appendln(s); :};
-item ::= BLOCK_COMMENT:s {: appendln(s); :};
+item ::= LINE_COMMENT:s {: writer.appendln(s); :};
+item ::= BLOCK_COMMENT:s {: writer.appendln(s); :};
 
 // TAGS
 item ::= PROGRAMME_DOMUS_OPEN_TAG:s {:
-	if(!stack.isEmpty()) {
-		throw new Exception("DOMUS program should start with PROGRAMME_DOMUS_OPEN_TAG");
-	}
-
-	stack.push("PROGRAMME_DOMUS_OPEN_TAG");
-	createFile();
+	writer.createFile();
 :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: 
-	if(stack.isEmpty() || stack.pop() != "PROGRAMME_DOMUS_OPEN_TAG") {
-		throw new Exception("Missing PROGRAMME_DOMUS_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: 
-	System.out.println();
-	stack.push("DECLARATION_APPAREILS_OPEN_TAG");
 :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_APPAREILS_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_APPAREILS_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {:
-	System.out.println();
-	stack.push("DECLARATION_INTERFACE_OPEN_TAG");
 :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_INTERFACE_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_INTERFACE_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
-	System.out.println();
-	stack.push("DECLARATION_SCENARII_OPEN_TAG");
 :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_SCENARII_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_SCENARII_OPEN_TAG");
-	}
 :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
-	System.out.println();
-	stack.push("SCENARIO_OPEN_TAG");
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "SCENARIO_OPEN_TAG") {
-		throw new Exception("Missing SCENARIO_OPEN_TAG");
-	}
 :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {:
-	System.out.println();
-	stack.push("DECLARATION_COMMANDES_OPEN_TAG");
 :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {:
-	if(stack.isEmpty() || stack.pop() != "DECLARATION_COMMANDES_OPEN_TAG") {
-		throw new Exception("Missing DECLARATION_COMMANDES_OPEN_TAG");
-	}
 :};
 
 // PUNCTUATIONS
-item ::= COMMA {:
-	identifierStack.pop();
+// item ::= COMMA {:  :};
+// item ::= DOT {: :};
+// item ::= ASSIGN {::};
+
+// item ::= CURLY_BRACKET_OPEN {:
+// 	stack.push(new Token("{", Type._PUNC));
+// :};
+// item ::= CURLY_BRACKET_CLOSE {:
+// 	if(stack.isEmpty() || stack.pop().getValue() != "{") {
+// 		throw new Exception("Missing curly bracket {");
+// 	}
+// :};
+
+// item ::= PARANTHESES_OPEN {:
+// :};
+// item ::= PARANTHESES_CLOSE {:
+// :};
+
+appareils ::= 
+	ECLAIRAGE:a {: RESULT = a; :} 
+	| VOLET:a {: RESULT = a; :}
+	| CHAUFFAGE:a {: RESULT = a; :}
+	| ALARME:a {: RESULT = a; :}
+	| FENETRE:a {: RESULT = a; :};
+
+autre_appareils ::= 
+	CAFETIERE:ap {: RESULT = "cafe"; :}
+	| HIFI:ap {: RESULT = "hifi"; :};
+
+interfaces ::= 
+	INTERRUPTEUR:i {: RESULT = i; :}
+	| MOBILE:i {: RESULT = i; :}
+	| TELEPHONE:i {: RESULT = i; :}
+	| TELECOMMANDE:i {: RESULT = i; :};
+
+item ::= appareils:a IDENTIFIER:identifier DOT {:
+	// TODO Update class name for VOLET to FENETRE
+	String appareils = (String) a;
+	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
+	writer.appendln(className + " " + identifier + " = new " + className + "(\"" + identifier + "\", TypeAppareil." + appareils.toUpperCase() + ");");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
-item ::= DOT {: currentClass = ""; typeClass = ""; identifierStack.clear(); :};
-item ::= ASSIGN {::};
 
-item ::= CURLY_BRACKET_OPEN {:
-	stack.push("{");
-:};
-item ::= CURLY_BRACKET_CLOSE {:
-	if(stack.isEmpty() || stack.pop() != "{") {
-		throw new Exception("Missing curly bracket {");
-	}
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE IDENTIFIER:identifier DOT {:
+	String appareils = (String) ap;
+	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
 
-item ::= PARANTHESES_OPEN {:
-	stack.push("(");
-:};
-item ::= PARANTHESES_CLOSE {:
-	if(stack.isEmpty() || stack.pop() != "(") {
-		throw new Exception("Missing paranthese (");
-	}
+subitem ::= COMMA IDENTIFIER:i subitem 
+| COMMA IDENTIFIER:i {:
+	System.out.println(i);
+	RESULT = i;
 :};
 
-// CLASSES
-item ::= ECLAIRAGE:n {: setClass("CEclairage", (String) n); :};
-item ::= VOLET:n {: setClass("CVoletFenetre", (String) n); :};
-item ::= CHAUFFAGE:n {: setClass("CChauffage", (String) n); :};
-item ::= ALARME:n {: setClass("CAlarme", (String) n); :};
-item ::= FENETRE:n {: setClass("CVoletFenetre", (String) n); :};
-item ::= AUTRE_APPAREIL:n {: setClass("CAutreAppareil", (String) n); :};
-
-item ::= CAFETIERE {: typeClass += "_CAFE"; :};
-item ::= HIFI {: typeClass += "_HIFI"; :};
-
-
-
-// keys
-item ::= DEFINIR {:
-	if(stack.contains("DECLARATION_APPAREILS_OPEN_TAG")) {
-		currentClass = "CEnsAppareil";
-	}
+item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:identifier2 CURLY_BRACKET_CLOSE DOT {:
+	writer.appendln("CEnsAppareil " + identifier1 + " = new CAutreAppareil(\"" + identifier1 + "\");");
+	writer.appendln(identifier1 + ".add(" + identifier2 + ");");
+	writer.appendln("ma_liste_ens_appareils.add(" + identifier1 + ");");
 :};
 
-
-item ::= IDENTIFIER:s {:
-	identifierStack.push(s);
-	
-	if(currentClass != "") {
-		if(identifierStack.size() < 2) {
-			append(currentClass + " " + s + " = new " + currentClass);
-		}
-
-		if(currentClass == "CEnsAppareil") {
-			appendln(identifierStack.get(0) + ".addAppareil(" + s + ");");
-		} else {
-			appendln("(\"" + s + "\", " + typeClass + ");");
-		}
-
-		if(identifierStack.get(0) == s) {
-			appendln("ma_liste_appareils.add(" + identifierStack.get(0) + ");");
-		}
-	}
+item ::= interfaces:i IDENTIFIER:identifier DOT {:
+	String interfaceName = (String) i;
+	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
+	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
 :};
 
