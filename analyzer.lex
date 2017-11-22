@@ -5,6 +5,19 @@ import java_cup.runtime.Symbol;
 %cup
 %line
 %column
+%{
+    public int getLine() {
+        return yyline + 1;
+    }
+
+    public int getColumn() {
+        return yycolumn + 1;
+    }
+    
+    public String getText() {
+        return yytext();
+    }
+%}
 
 %%
 "<PROGRAMME_DOMUS>" { return new Symbol(sym.PROGRAMME_DOMUS_OPEN_TAG); }

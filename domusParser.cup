@@ -6,8 +6,16 @@ parser code {:
 		new parser(new Yylex(System.in)).parse();
 	}
 	
-	public void syntax_error(Symbol s){
-    	System.out.println("compiler has detected a syntax error at line " + s.left + " column " + s.right);
+	public void syntax_error(Symbol s) {
+    	System.out.println("compiler has detected a syntax error at line " + getLine() + " column " + getColumn());
+	}
+
+	public int getLine() {
+		return ((Yylex) getScanner()).getLine();
+	}
+
+	public int getColumn() {
+		return ((Yylex) getScanner()).getColumn();
 	}
 :}
 
@@ -103,7 +111,6 @@ subitem ::=
 	| DOT {::};
 
 item ::= appareils:a IDENTIFIER:identifier subitem:si {:
-	System.out.println(si);
 	// TODO Update class name for VOLET to FENETRE
 	String appareils = (String) a;
 	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
@@ -132,10 +139,10 @@ item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
 
 
 // IDENTIFIER DOT =>> Action sub item
-item ::= POURTOUT IDENTIFIER:id1 COLON IDENTIFIER:id2 FAIRE item:app_action FAIT SEMI_COLON {::};
-item ::= IDENTIFIER:id DOT actions:a SEMI_COLON {:
-	System.out.println(id);
-	System.out.println(a);
-:};
-item ::= SI PARANTHESES_OPEN item EQUALS item PARANTHESES_CLOSE {::};
+// item ::= POURTOUT IDENTIFIER:id1 COLON IDENTIFIER:id2 FAIRE item:app_action FAIT SEMI_COLON {::};
+// item ::= IDENTIFIER:id DOT actions:a SEMI_COLON {:
+// 	System.out.println(id);
+// 	System.out.println(a);
+// :};
+// item ::= SI PARANTHESES_OPEN item EQUALS item PARANTHESES_CLOSE {::};
 // item ::= ALORS item FSI

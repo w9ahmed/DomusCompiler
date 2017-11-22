@@ -60,7 +60,7 @@ echo -e '\e[34mRunning parser on file:\e[39m' $TESTFILE
 echo -e $SEPERATOR
 java parser < $TESTFILE
 
-# if [ -f CMaisonUser.java ]
-# then
-# 		# code CMaisonUser.java
-# fi
+if [ -f CMaisonUser.java ]
+then
+		code CMaisonUser.java
+fi
