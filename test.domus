@@ -30,5 +30,21 @@
 			si (rad1.etat == eteint) alors rad1.allumer; fsi;
 			hf.allumer;
 		</SCENARIO bonjour>
+		<SCENARIO soiree>
+			pourtout v:volet faire v.fermer; fait;
+			pourtout e:mon_eclairage_salon faire e.allumer; fait;
+		</SCENARIO soiree>
+		<SCENARIO soiree_musique>
+				executer_scenario soiree; 
+				pourtout e:autre_appareil(hifi) faire e.allumer; fait;
+		</SCENARIO soiree_musique>
+		<SCENARIO depart>
+			message("Scenario Départ");
+			pourtout v:volet faire v.fermer; fait;
+			pourtout e:eclairage faire e.eteindre; fait;
+			pourtout x:autre_appareil faire x.eteindre; fait;
+			si (fen.etat == ferme) alors a1.allumer; 
+			sinon message("Attention : la fenÃªtre ",fen," est ouverte !"); fsi;
+		</SCENARIO depart>
 	<DECLARATION_SCENARII>
 </PROGRAMME_DOMUS>

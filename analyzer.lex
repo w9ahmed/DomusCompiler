@@ -32,8 +32,8 @@ import java_cup.runtime.Symbol;
 "<DECLARATION_SCENARII>" { return new Symbol(sym.DECLARATION_SCENARII_OPEN_TAG); }
 "</DECLARATION_SCENARII>" { return new Symbol(sym.DECLARATION_SCENARII_CLOSE_TAG); }
 
-("<SCENARIO "[a-z]+ ">") { return new Symbol(sym.SCENARIO_OPEN_TAG, new String(yytext())); }
-("</SCENARIO "[a-z]+ ">") { return new Symbol(sym.SCENARIO_CLOSE_TAG, new String(yytext())); }
+("<SCENARIO "([a-zA-Z]+[a-zA-Z_0-9]*)+ ">") { return new Symbol(sym.SCENARIO_OPEN_TAG, new String(yytext())); }
+("</SCENARIO "([a-zA-Z]+[a-zA-Z_0-9]*)+ ">") { return new Symbol(sym.SCENARIO_CLOSE_TAG, new String(yytext())); }
 
 "<DECLARATION_COMMANDES>" { return new Symbol(sym.DECLARATION_COMMANDES_OPEN_TAG); }
 "</DECLARATION_COMMANDES>" { return new Symbol(sym.DECLARATION_COMMANDES_CLOSE_TAG); }
@@ -100,6 +100,8 @@ import java_cup.runtime.Symbol;
 "}" { return new Symbol(sym.CURLY_BRACKET_CLOSE); }
 "(" { return new Symbol(sym.PARANTHESES_OPEN); }
 ")" { return new Symbol(sym.PARANTHESES_CLOSE); }
+"\"" { return new Symbol(sym.QUOTATION_OPEN); }
+"\"" { return new Symbol(sym.QUOTATION_CLOSE); }
 
 "==" { return new Symbol(sym.EQUALS); }
 
