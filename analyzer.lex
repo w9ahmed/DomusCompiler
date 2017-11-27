@@ -26,8 +26,8 @@ import java_cup.runtime.Symbol;
 "<DECLARATION_APPAREILS>" { return new Symbol(sym.DECLARATION_APPAREILS_OPEN_TAG); }
 "</DECLARATION_APPAREILS>" { return new Symbol(sym.DECLARATION_APPAREILS_CLOSE_TAG); }
 
-"<DECLARATION_INTERFACE>" { return new Symbol(sym.DECLARATION_INTERFACE_OPEN_TAG); }
-"</DECLARATION_INTERFACE>" { return new Symbol(sym.DECLARATION_INTERFACE_CLOSE_TAG); }
+"<DECLARATION_INTERFACES>" { return new Symbol(sym.DECLARATION_INTERFACE_OPEN_TAG); }
+"</DECLARATION_INTERFACES>" { return new Symbol(sym.DECLARATION_INTERFACE_CLOSE_TAG); }
 
 "<DECLARATION_SCENARII>" { return new Symbol(sym.DECLARATION_SCENARII_OPEN_TAG); }
 "</DECLARATION_SCENARII>" { return new Symbol(sym.DECLARATION_SCENARII_CLOSE_TAG); }
@@ -51,22 +51,22 @@ import java_cup.runtime.Symbol;
 "sinon" { return new Symbol(sym.SINON); }
 "fsi" { return new Symbol(sym.FSI); }
 
-"ouverir" { return new Symbol(sym.OUVERIR, new String(yytext())); }
+"ouvrir" { return new Symbol(sym.OUVRIR, new String(yytext())); }
 "fermer" { return new Symbol(sym.FERMER, new String(yytext())); }
 "eteindre" { return new Symbol(sym.ETEINDRE, new String(yytext())); }
 "allumer" { return new Symbol(sym.ALLUMER, new String(yytext())); }
 "tamiser" { return new Symbol(sym.TAMISER, new String(yytext())); }
 "allumer_partiel" { return new Symbol(sym.ALLUMER_PARTIEL, new String(yytext())); }
 "allumer_eco" { return new Symbol(sym.ALLUMER_ECO, new String(yytext())); }
-"ouverir_partiel" { return new Symbol(sym.OUVERIR_PARTIEL, new String(yytext())); }
+"ouvrir_partiel" { return new Symbol(sym.OUVRIR_PARTIEL, new String(yytext())); }
 
-"etat" { return new Symbol(sym.ETAT); }
-"allume" { return new Symbol(sym.ALLUME); }
-"etein" { return new Symbol(sym.ETEIN); }
-"demi" { return new Symbol(sym.DEMI); }
-"eco" { return new Symbol(sym.ECO); }
-"ouvert" { return new Symbol(sym.OUVERT); }
-"ferme" { return new Symbol(sym.FERME); }
+"etat" { return new Symbol(sym.ETAT, new String(yytext())); }
+"allume" { return new Symbol(sym.ALLUME, new String(yytext())); }
+"eteint" { return new Symbol(sym.ETEINT, new String(yytext())); }
+"demi" { return new Symbol(sym.DEMI, new String(yytext())); }
+"eco" { return new Symbol(sym.ECO, new String(yytext())); }
+"ouvert" { return new Symbol(sym.OUVERT, new String(yytext())); }
+"ferme" { return new Symbol(sym.FERME, new String(yytext())); }
 
 "eclairage" { return new Symbol(sym.ECLAIRAGE, new String(yytext())); }
 "volet" { return new Symbol(sym.VOLET, new String(yytext())); }

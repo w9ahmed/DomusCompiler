@@ -17,3 +17,12 @@ ma_liste_appareils.add(hf);
 CEnsAppareil mon_eclairage_salon = new CAutreAppareil("mon_eclairage_salon");
 mon_eclairage_salon.add(e2);
 ma_liste_ens_appareils.add(mon_eclairage_salon);
+// déclaration des interfaces
+CInterface b1 = new CInterface("b1", TypeInterface.INTERRUPTEUR);
+ma_liste_interfaces.add(b1);
+CInterface t1 = new CInterface("t1", TypeInterface.MOBILE);
+ma_liste_interfaces.add(t1);
+CInterface c1 = new CInterface("c1", TypeInterface.TELECOMMANDE);
+ma_liste_interfaces.add(c1);
+// déclaration des scenarii
+// déclaration du scenario bonjour

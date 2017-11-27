@@ -1,21 +1,34 @@
 <PROGRAMME_DOMUS>
-// Commentaire : declaration des appareils
-<DECLARATION_APPAREILS>
-eclairage e1, e2, e3.
-volet v1, v2, v3, v4.
-chauffage rad1.
-alarme a1.
-fenetre fen.
-autre_appareil(cafetiere) cafe.
-autre_appareil(hifi) hf.
+	// Commentaire : declaration des appareils
+	<DECLARATION_APPAREILS>
+		eclairage e1, e2, e3.
+		volet v1, v2, v3, v4.
+		chauffage rad1.
+		alarme a1.
+		fenetre fen.
+		autre_appareil(cafetiere) cafe.
+		autre_appareil(hifi) hf.
 
-// déclaration d'un ensemble d'appareils (type énumeré utilisateur)
-definir mon_eclairage_salon = {e2,e3}.
-</DECLARATION_APPAREILS>
-// déclaration des interfaces
-<DECLARATION_INTERFACES>
-interrupteur b1, b2.
-mobile t1.
-telecommande c1.
-</DECLARATION_INTERFACES>
+		// déclaration d'un ensemble d'appareils (type énumeré utilisateur)
+		definir mon_eclairage_salon = {e2,e3}.
+	</DECLARATION_APPAREILS>
+
+	// déclaration des interfaces
+		<DECLARATION_INTERFACES>
+		interrupteur b1, b2.
+		mobile t1.
+		telecommande c1.
+	</DECLARATION_INTERFACES>
+
+	// déclaration des scenarii
+	<DECLARATION_SCENARII>
+		// déclaration du scenario bonjour
+		<SCENARIO bonjour>
+			pourtout v:volet faire v.ouvrir; fait;
+			a1.eteindre;
+			cafe.allumer;
+			si (rad1.etat == eteint) alors rad1.allumer; fsi;
+			hf.allumer;
+		</SCENARIO bonjour>
+	<DECLARATION_SCENARII>
 </PROGRAMME_DOMUS>

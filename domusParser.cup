@@ -8,6 +8,7 @@ parser code {:
 	
 	public void syntax_error(Symbol s) {
     	System.out.println("compiler has detected a syntax error at line " + getLine() + " column " + getColumn());
+		System.out.println(getText());
 	}
 
 	public int getLine() {
@@ -16,6 +17,10 @@ parser code {:
 
 	public int getColumn() {
 		return ((Yylex) getScanner()).getColumn();
+	}
+	
+	public String getText() {
+		return ((Yylex) getScanner()).getText();
 	}
 :}
 
@@ -30,8 +35,8 @@ terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
  DECLARATION_COMMANDES_OPEN_TAG, DECLARATION_COMMANDES_CLOSE_TAG,
  
  DEFINIR, EXECUTOR_SCENARIO, ASSOCIER, PROGRAMMER, MESSAGE, POURTOUT,
- FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVERIR, FERMER, ETEINDRE, ALLUMER,
- TAMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVERIR_PARTIEL, ALLUME, ETEIN,
+ FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVRIR, FERMER, ETEINDRE, ALLUMER,
+ TAMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVRIR_PARTIEL, ALLUME, ETEINT,
  DEMI, ECO, OUVERT, FERME, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
  LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL,
 
@@ -44,7 +49,7 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
-non terminal appareils, autre_appareils, interfaces, actions;
+non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
 	System.out.println("\n\nAnalyse terminee!");
@@ -93,14 +98,22 @@ interfaces ::=
 	| TELECOMMANDE:i {: RESULT = i; :};
 
 actions ::=
-      OUVERIR:a {: RESULT = a; :}
+      OUVRIR:a {: RESULT = a; :}
 	| FERMER:a {: RESULT = a; :} 
 	| ETEINDRE:a {: RESULT = a; :} 
 	| ALLUMER :a {: RESULT = a; :}
 	| TAMISER:a {: RESULT = a; :}
 	| ALLUMER_PARTIEL:a {: RESULT = a; :}
 	| ALLUMER_ECO:a {: RESULT = a; :}
-	| OUVERIR_PARTIEL:a {: RESULT = a; :};
+	| OUVRIR_PARTIEL:a {: RESULT = a; :};
+
+states ::=
+	  ALLUME :s {: RESULT = s; :}
+	| ETEINT:s {: RESULT = s; :}
+	| DEMI:s {: RESULT = s; :}
+	| ECO:s {: RESULT = s; :}
+	| OUVERT:s {: RESULT = s; :}
+	| FERME:s {: RESULT = s; :};
 
 subitem ::=
 	  COMMA IDENTIFIER:identifier subitem:a
@@ -139,10 +152,11 @@ item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
 
 
 // IDENTIFIER DOT =>> Action sub item
-// item ::= POURTOUT IDENTIFIER:id1 COLON IDENTIFIER:id2 FAIRE item:app_action FAIT SEMI_COLON {::};
-// item ::= IDENTIFIER:id DOT actions:a SEMI_COLON {:
-// 	System.out.println(id);
-// 	System.out.println(a);
-// :};
-// item ::= SI PARANTHESES_OPEN item EQUALS item PARANTHESES_CLOSE {::};
-// item ::= ALORS item FSI
+item ::= POURTOUT IDENTIFIER:id1 COLON appareils:app FAIRE IDENTIFIER:id2 DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
+
+item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
+// TO BE UPDATED THIS PART
+item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
+item ::= IDENTIFIER:id DOT ETAT {::};
+item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
+item ::= FSI SEMI_COLON {::};
