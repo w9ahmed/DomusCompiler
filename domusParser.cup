@@ -151,10 +151,11 @@ item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
 :};
 
 
-// IDENTIFIER DOT =>> Action sub item
+// POURTOUT : to be refactored into 1 statement
 item ::= POURTOUT IDENTIFIER:id1 COLON appareils:app FAIRE IDENTIFIER:id2 DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
 item ::= POURTOUT IDENTIFIER:id1 COLON IDENTIFIER:id2 FAIRE IDENTIFIER:id3 DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
 item ::= POURTOUT IDENTIFIER:id1 COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE FAIRE IDENTIFIER:id2 DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
+item ::= POURTOUT IDENTIFIER:id COLON AUTRE_APPAREIL FAIRE IDENTIFIER DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
 
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
 // TO BE UPDATED THIS PART
