@@ -110,6 +110,18 @@ clean|c)
 test|t)
 	run_parser
 ;;
+which|w)
+	echo -e "* \e[100mLex file:\e[49m"
+	tree . | grep $LEXFILE
+	echo
+
+	echo -e "* \e[100mCup file:\e[49m"
+	tree . | grep $CUPFILE
+	echo
+
+	echo -e "* \e[100mTest file:\e[49m"
+	tree . | grep $TESTFILE
+;;
 help)
 	echo 'Usage: ./compile.sh [] [all|a] [lex|l] [cup|p] [clean|c] [test|t]'
 	echo
@@ -124,6 +136,8 @@ help)
 	echo -e '\e[2m./compile.sh clean\e[0m or \e[2m./compile.sh c\e[0m will clean the directory from all compiled files.'
 	echo
 	echo -e '\e[2m./compile.sh test\e[0m or \e[2m./compile.sh t\e[0m will run the parser on the test file.'
+	echo
+	echo -e '\e[2m./compile.sh which\e[0m or \e[2m./compile.sh w\e[0m will show the files that are being used.'
 ;;
 *)
 	echo 'domus: command not found'
