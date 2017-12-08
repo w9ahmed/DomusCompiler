@@ -110,6 +110,7 @@ import java_cup.runtime.Symbol;
 
 ([a-zA-Z]+[a-zA-Z_0-9]*) { return new Symbol(sym.IDENTIFIER, new String(yytext())); }
 
+("\"".*"\"") { return new Symbol(sym.STRING_LITERAL, new String(yytext())); }
 
 \n {}
 . {}

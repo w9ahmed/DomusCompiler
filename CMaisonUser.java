@@ -26,3 +26,6 @@ CInterface c1 = new CInterface("c1", TypeInterface.TELECOMMANDE);
 ma_liste_interfaces.add(c1);
 // déclaration des scenarii
 // déclaration du scenario bonjour
+// déclaration du scenario soiree
+// déclaration du scenario soiree musique
+// déclaration du scenario depart

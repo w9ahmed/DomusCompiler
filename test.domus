@@ -30,14 +30,17 @@
 			si (rad1.etat == eteint) alors rad1.allumer; fsi;
 			hf.allumer;
 		</SCENARIO bonjour>
+		// déclaration du scenario soiree
 		<SCENARIO soiree>
 			pourtout v:volet faire v.fermer; fait;
 			pourtout e:mon_eclairage_salon faire e.allumer; fait;
 		</SCENARIO soiree>
+		// déclaration du scenario soiree musique
 		<SCENARIO soiree_musique>
 				executer_scenario soiree; 
 				pourtout e:autre_appareil(hifi) faire e.allumer; fait;
 		</SCENARIO soiree_musique>
+		// déclaration du scenario depart
 		<SCENARIO depart>
 			message("Scenario Départ");
 			pourtout v:volet faire v.fermer; fait;
