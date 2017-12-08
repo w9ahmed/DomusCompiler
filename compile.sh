@@ -111,8 +111,19 @@ test|t)
 	run_parser
 ;;
 help)
-	echo -e '\tPossible commands:'
-	echo -e "\t all | lex | cup | clean | test"
+	echo 'Usage: ./compile.sh [] [all|a] [lex|l] [cup|p] [clean|c] [test|t]'
+	echo
+	echo 'Default command ./compile.sh will just compile.'
+	echo
+	echo -e '\e[2m./compile.sh all\e[0m or \e[2m./compile.sh a\e[0m will compile and then open up the result in vs code.'
+	echo
+	echo -e '\e[2m./compile.sh lex\e[0m or \e[2m./compile.sh l\e[0m will only compile the lex file.'
+	echo
+	echo -e '\e[2m./compile.sh cup\e[0m or \e[2m./compile.sh p\e[0m will only compile the cup file.'
+	echo
+	echo -e '\e[2m./compile.sh clean\e[0m or \e[2m./compile.sh c\e[0m will clean the directory from all compiled files.'
+	echo
+	echo -e '\e[2m./compile.sh test\e[0m or \e[2m./compile.sh t\e[0m will run the parser on the test file.'
 ;;
 *)
 	echo 'domus: command not found'
