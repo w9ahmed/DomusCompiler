@@ -1,5 +1,5 @@
 #!/bin/bash
-echo 'Compiling...'
+
 
 LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
@@ -77,13 +77,43 @@ open_files() {
 	fi
 }
 
-run_all() {
+compile() {
 	clean_directory
 	compile_lex
 	compile_cup
 	compile_javafiles
+}
+
+run_all() {
+	compile
 	run_parser
 }
 
-run_all
-# open_files
+case "$1" in
+"")
+	echo 'Compiling...'
+	compile
+;;
+all|a)
+	echo 'Compiling...'
+	run_all
+;;
+lex|l)
+	compile_lex
+;;
+cup|p)
+	compile_cup
+;;
+clean|c)
+	clean_directory
+;;
+test|t)
+	run_parser
+;;
+help)
+	echo -e '\tPossible commands:'
+	echo -e "\t all | lex | cup | clean | test"
+;;
+*)
+	echo 'domus: command not found'
+esac
