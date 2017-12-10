@@ -161,17 +161,6 @@ message_subitem ::=
 	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {::}
 	| {::};
 
-programmer_subset ::=
-	  DATE {::}
-	| CURLY_BRACKET_OPEN DATE COMMA programmer_subset CURLY_BRACKET_CLOSE {::}
-	| {::};
-
-associer_subitem ::=
-	  IDENTIFIER:id {::}
-	| IDENTIFIER:id COMMA associer_subitem {::}
-	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
-	| {::};
-
 
 
 item ::= appareils:a appareils_subitem {:
@@ -243,5 +232,25 @@ item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
 
 item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
 
-item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {::};
-item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {::};
+item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {:
+	while(!stack.isEmpty()) {
+		String scenario = stack.pop();
+		writer.appendln(id + ".addScenarioAssocie(\"" + scenario +"\");");
+	}
+:};
+associer_subitem ::=
+	  IDENTIFIER:id {: stack.push(id); :}
+	| IDENTIFIER:id COMMA associer_subitem {: stack.push(id); :}
+	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
+	| {::};
+
+item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {:
+	writer.appendln("CProgrammation p = new CProgrammation(\"" + id + "\");");
+	while(!stack.isEmpty()) {
+		writer.appendln("CDate pd = new CDate" + stack.pop() + ";");
+	}
+:};
+programmer_subset ::=
+	  DATE:date {: stack.push(Utils.fixDate(date)); :}
+	| DATE:date COMMA programmer_subset {: stack.push(Utils.fixDate(date)); :}
+	| CURLY_BRACKET_OPEN programmer_subset CURLY_BRACKET_CLOSE {::};
