@@ -3,7 +3,7 @@
 
 LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
-TESTFILE="exo-simple.txt"
+TESTFILE="test/exo-simple.txt"
 
 SEPERATOR="\n\n\n"
 DELETE="\t\e[31mDeleting\e[39m"
