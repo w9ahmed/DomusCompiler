@@ -44,6 +44,9 @@ clean_directory() {
 		rm -r generated
 		mkdir generated
 	fi
+
+	echo -e $DELETE *.class
+	rm *.class
 }
 
 compile_lex() {
@@ -70,7 +73,7 @@ run_parser() {
 }
 
 open_files() {
-	if [ -f CMaisonUser.java ]
+	if [ -f generated/CMaisonUser.java ]
 	then
 		code generated/CMaisonUser.java
 	fi
