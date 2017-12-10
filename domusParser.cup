@@ -40,16 +40,16 @@ terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
  DEMI, ECO, OUVERT, FERME, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
  LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL,
 
- DOT, COMMA, COLON, ASSIGN, SEMI_COLON, CURLY_BRACKET_OPEN, CURLY_BRACKET_CLOSE, EQUALS, PARANTHESES_OPEN, PARANTHESES_CLOSE, QUOTATION_OPEN, QUOTATION_CLOSE;
+ DOT, COMMA, COLON, ASSIGN, SEMI_COLON, CURLY_BRACKET_OPEN, CURLY_BRACKET_CLOSE, EQUALS, PARANTHESES_OPEN, PARANTHESES_CLOSE;
 
-terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT, STRING_LITERAL;
+terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT, STRING_LITERAL, DATE;
 // appareils
 terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 // interface
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
-non terminal pourtout_subitem;
+non terminal pourtout_subitem, pourtout_action, si_subitem, message_subitem, programmer_subset;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
@@ -89,8 +89,16 @@ appareils ::=
 	| FENETRE:a {: RESULT = a; :};
 
 autre_appareils ::= 
-	  CAFETIERE:ap {: RESULT = "cafe"; :}
-	| HIFI:ap {: RESULT = "hifi"; :};
+	  TABLETTE:ap {: RESULT = "tablette"; :}
+	| TV:ap {: RESULT = "tv"; :}
+	| HIFI:ap {: RESULT = "hifi"; :}
+	| CAFETIERE:ap {: RESULT = "cafe"; :}
+	| VIDEO_PROJ:ap {: RESULT = "video_proj"; :}
+	| LAVE_VAISSELLE:ap {: RESULT = "lave_vaisselle"; :}
+	| LAVE_LINGE:ap {: RESULT = "lave_linge"; :}
+	| SECHE_LINGE:ap {: RESULT = "seche_linge"; :}
+	| ORDINATEUR:ap {: RESULT = "ordinateur"; :}
+	| PORTAIL:ap {: RESULT = "portail"; :};
 
 interfaces ::= 
 	  INTERRUPTEUR:i {: RESULT = i; :}
@@ -117,10 +125,7 @@ states ::=
 	| FERME:s {: RESULT = s; :};
 
 subitem ::=
-	  COMMA IDENTIFIER:identifier subitem:a
-	  {:
-		RESULT = identifier;
-	  :}
+	  COMMA IDENTIFIER:identifier subitem:a {: RESULT = identifier; :}
 	| CURLY_BRACKET_CLOSE DOT {::}
 	| DOT {::};
 
@@ -129,6 +134,25 @@ pourtout_subitem ::=
 	| IDENTIFIER:a {::} 
 	| AUTRE_APPAREIL {::}
 	| AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE {::};
+
+pourtout_action ::=
+	  IDENTIFIER:id2 DOT actions:app_action
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+
+si_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action {::}
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+
+message_subitem ::=
+	  STRING_LITERAL:s {::}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {::}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {::}
+	| {::};
+
+programmer_subset ::=
+	  DATE {::}
+	| CURLY_BRACKET_OPEN DATE COMMA programmer_subset CURLY_BRACKET_CLOSE {::}
+	| {::};
 
 item ::= appareils:a IDENTIFIER:identifier subitem:si {:
 	// TODO Update class name for VOLET to FENETRE
@@ -158,14 +182,21 @@ item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
 :};
 
 
-item ::= POURTOUT IDENTIFIER:id1 COLON pourtout_subitem FAIRE IDENTIFIER:id2 DOT actions:app_action SEMI_COLON FAIT SEMI_COLON {::};
+item ::= POURTOUT IDENTIFIER:id1 COLON pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_COLON {::};
 
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
 // TO BE UPDATED THIS PART
-item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
+item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
+item ::= SINON IDENTIFIER:id DOT actions:app_action SEMI_COLON FSI SEMI_COLON {::};
+
 item ::= IDENTIFIER:id DOT ETAT {::};
 item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
 item ::= FSI SEMI_COLON {::};
 
 item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
-item ::= MESSAGE PARANTHESES_OPEN STRING_LITERAL PARANTHESES_CLOSE SEMI_COLON {::};
+
+item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
+
+item ::= ASSOCIER IDENTIFIER:id ASSIGN IDENTIFIER:id2 DOT {::};
+item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {::};
+

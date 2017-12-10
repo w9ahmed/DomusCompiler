@@ -25,3 +25,5 @@ CInterface b4 = new CInterface("b4", TypeInterface.INTERRUPTEUR);
 ma_liste_interfaces.add(b4);
 // declaration des scenarii
 // declaration du scenario bonjour
+// declaration des commandes
+// le scenario soiree est lance tous les soirs du premier jour de chaque mois 2017 a 18h.
