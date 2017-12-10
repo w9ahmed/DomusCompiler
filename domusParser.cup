@@ -28,6 +28,7 @@ action code {:
 	Writer writer = new Writer("CMaisonUser.java");
 	Hashtable< String, String > table = new Hashtable< String, String >();
 	Stack<String> stack = new Stack<String>();
+	int programmerCount = 0;
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -245,10 +246,17 @@ associer_subitem ::=
 	| {::};
 
 item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {:
-	writer.appendln("CProgrammation p = new CProgrammation(\"" + id + "\");");
+	String className = "p" + ++programmerCount;
+	writer.appendln("CProgrammation " + className + " = new CProgrammation(\"" + id + "\");");
+
+	int count = 1;
 	while(!stack.isEmpty()) {
-		writer.appendln("CDate pd = new CDate" + stack.pop() + ";");
+		String dateClassName = className + "d" + count;
+		writer.appendln("CDate " + dateClassName + " = new CDate" + stack.pop() + ";");
+		writer.appendln(className + ".addDate(" + dateClassName + ");");
+		count++;
 	}
+	writer.appendln("ma_liste_programmations.add(" + className + ");");
 :};
 programmer_subset ::=
 	  DATE:date {: stack.push(Utils.fixDate(date)); :}
