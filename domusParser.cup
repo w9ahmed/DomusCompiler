@@ -242,8 +242,7 @@ item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {:
 associer_subitem ::=
 	  IDENTIFIER:id {: stack.push(id); :}
 	| IDENTIFIER:id COMMA associer_subitem {: stack.push(id); :}
-	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
-	| {::};
+	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::};
 
 item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {:
 	String className = "p" + ++programmerCount;
