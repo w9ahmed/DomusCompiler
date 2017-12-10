@@ -15,33 +15,34 @@ clean_directory() {
 	if [ -f parser.java ]
 	then
 		echo -e $DELETE parser.**
-		rm -r parser.**
+		rm parser.**
 	fi
 
 
 	if [ -f sym.java ]
 	then
 			echo -e $DELETE sym.**
-		rm -r sym.**
+		rm sym.**
 	fi
 
 
 	if [ -f Yylex.java ]
 	then
 			echo -e $DELETE Yylex.**
-		rm -r Yylex.**
+		rm Yylex.**
 	fi
 
 	if [ -f CUP$parser$actions.class ]
 	then
 			echo -e $DELETE 'CUP$parser$actions.class...'
-		rm -r CUP$parser$actions.class
+		rm CUP$parser$actions.class
 	fi
 
-	if [ -f CMaisonUser.java ]
+	if [ generated ]
 	then
-			echo -e $DELETE 'CMaisonUser.java...'
-		rm -r CMaisonUser.java
+		echo -e $DELETE 'generated...'
+		rm -r generated
+		mkdir generated
 	fi
 }
 
@@ -65,12 +66,20 @@ run_parser() {
 	echo -e '\e[34mRunning parser on file:\e[39m' $TESTFILE
 	echo -e $SEPERATOR
 	java parser < "$TESTDIR/$TESTFILE"
+	move_files
 }
 
 open_files() {
 	if [ -f CMaisonUser.java ]
 	then
-			code CMaisonUser.java
+		code generated/CMaisonUser.java
+	fi
+}
+
+move_files() {
+	if [ -f CMaisonUser.java ]
+	then
+		mv CMaisonUser.java generated/
 	fi
 }
 
