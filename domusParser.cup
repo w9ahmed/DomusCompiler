@@ -1,5 +1,4 @@
 import java_cup.runtime.*;
-import java.util.Stack;
 
 parser code {:
 	public static void main(String args[]) throws Exception {
@@ -49,6 +48,7 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
+non terminal appareils_subitem, interfaces_subitem, autre_appareils_subitem;
 non terminal pourtout_subitem, pourtout_action, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
@@ -75,8 +75,8 @@ item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {: :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
-item ::= SCENARIO_OPEN_TAG:s {: :};
-item ::= SCENARIO_CLOSE_TAG:s {: :};
+item ::= SCENARIO_OPEN_TAG:s {: System.out.println(Utils.retrieveName(s)); :};
+item ::= SCENARIO_CLOSE_TAG:s {:  :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {: :};
@@ -164,18 +164,33 @@ associer_subitem ::=
 	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
 	| {::};
 
-item ::= appareils:a IDENTIFIER:identifier subitem:si {:
+
+appareils_subitem ::=
+	  IDENTIFIER:identifier DOT {::}
+	| IDENTIFIER:identifier COMMA appareils_subitem {::};
+
+interfaces_subitem ::=
+	  IDENTIFIER:identifier DOT {::}
+	| IDENTIFIER:identifier COMMA interfaces_subitem {::};
+
+autre_appareils_subitem ::=
+	  IDENTIFIER DOT
+	| IDENTIFIER COMMA autre_appareils_subitem {::};
+
+
+
+item ::= appareils:a appareils_subitem {:
 	// TODO Update class name for VOLET to FENETRE
-	String appareils = (String) a;
+/* 	String appareils = (String) a;
 	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
 	writer.appendln(className + " " + identifier + " = new " + className + "(\"" + identifier + "\", TypeAppareil." + appareils.toUpperCase() + ");");
-	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+	writer.appendln("ma_liste_appareils.add(" + identifier + ");"); */
 :};
 
-item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE IDENTIFIER:identifier subitem:si {:
-	String appareils = (String) ap;
-	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
-	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE autre_appareils_subitem {:
+	// String appareils = (String) ap;
+	// writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
+	// writer.appendln("ma_liste_appareils.add(" + identifier + ");");
 :};
 
 
@@ -185,10 +200,10 @@ item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:iden
 	writer.appendln("ma_liste_ens_appareils.add(" + identifier1 + ");");
 :};
 
-item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
-	String interfaceName = (String) i;
+item ::= interfaces:i interfaces_subitem {:
+/* 	String interfaceName = (String) i;
 	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
-	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
+	writer.appendln("ma_liste_interfaces.add(" + identifier + ");"); */
 :};
 
 
