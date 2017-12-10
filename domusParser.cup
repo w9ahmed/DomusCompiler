@@ -49,7 +49,7 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
-non terminal pourtout_subitem, pourtout_action, si_subitem, message_subitem, programmer_subset;
+non terminal pourtout_subitem, pourtout_action, si_subitem, message_subitem, programmer_subset, associer_subitem;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
@@ -154,6 +154,12 @@ programmer_subset ::=
 	| CURLY_BRACKET_OPEN DATE COMMA programmer_subset CURLY_BRACKET_CLOSE {::}
 	| {::};
 
+associer_subitem ::=
+	  IDENTIFIER:id {::}
+	| IDENTIFIER:id COMMA associer_subitem {::}
+	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
+	| {::};
+
 item ::= appareils:a IDENTIFIER:identifier subitem:si {:
 	// TODO Update class name for VOLET to FENETRE
 	String appareils = (String) a;
@@ -197,6 +203,7 @@ item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
 
 item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
 
-item ::= ASSOCIER IDENTIFIER:id ASSIGN IDENTIFIER:id2 DOT {::};
+item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {::};
+
 item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {::};
 

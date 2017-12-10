@@ -3,6 +3,8 @@
 
 LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
+
+TESTDIR="test"
 TESTFILE="exo-simple.txt"
 
 SEPERATOR="\n\n\n"
@@ -62,7 +64,7 @@ compile_javafiles() {
 run_parser() {
 	echo -e '\e[34mRunning parser on file:\e[39m' $TESTFILE
 	echo -e $SEPERATOR
-	java parser < $TESTFILE
+	java parser < "$TESTDIR/$TESTFILE"
 }
 
 open_files() {
@@ -119,7 +121,7 @@ which|w)
 	echo
 
 	echo -e "* \e[100mTest file:\e[49m"
-	tree . | grep $TESTFILE
+	tree $TESTDIR | grep $TESTFILE
 ;;
 open|o)
 	open_files
