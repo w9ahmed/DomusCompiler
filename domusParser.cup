@@ -89,8 +89,16 @@ appareils ::=
 	| FENETRE:a {: RESULT = a; :};
 
 autre_appareils ::= 
-	  CAFETIERE:ap {: RESULT = "cafe"; :}
-	| HIFI:ap {: RESULT = "hifi"; :};
+	  TABLETTE:ap {: RESULT = "tablette"; :}
+	| TV:ap {: RESULT = "tv"; :}
+	| HIFI:ap {: RESULT = "hifi"; :}
+	| CAFETIERE:ap {: RESULT = "cafe"; :}
+	| VIDEO_PROJ:ap {: RESULT = "video_proj"; :}
+	| LAVE_VAISSELLE:ap {: RESULT = "lave_vaisselle"; :}
+	| LAVE_LINGE:ap {: RESULT = "lave_linge"; :}
+	| SECHE_LINGE:ap {: RESULT = "seche_linge"; :}
+	| ORDINATEUR:ap {: RESULT = "ordinateur"; :}
+	| PORTAIL:ap {: RESULT = "portail"; :};
 
 interfaces ::= 
 	  INTERRUPTEUR:i {: RESULT = i; :}
@@ -117,10 +125,7 @@ states ::=
 	| FERME:s {: RESULT = s; :};
 
 subitem ::=
-	  COMMA IDENTIFIER:identifier subitem:a
-	  {:
-		RESULT = identifier;
-	  :}
+	  COMMA IDENTIFIER:identifier subitem:a {: RESULT = identifier; :}
 	| CURLY_BRACKET_CLOSE DOT {::}
 	| DOT {::};
 
