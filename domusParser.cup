@@ -78,8 +78,18 @@ item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {: :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
-item ::= SCENARIO_OPEN_TAG:s {: System.out.println(Utils.retrieveName(s)); :};
-item ::= SCENARIO_CLOSE_TAG:s {:  :};
+item ::= SCENARIO_OPEN_TAG:s {:
+	table.put("SCENARIO", Utils.retrieveName(s));
+	writer.append("String " + Utils.retrieveName(s) + "_contenu = \"\\n");
+:};
+item ::= SCENARIO_CLOSE_TAG:s {:
+	String scenario = table.get("SCENARIO");
+	writer.appendln("\";");
+	writer.appendln("CScenario " + scenario + " = new CScenario(\"" + scenario + "\", " + scenario + "_contenu);");
+	writer.appendln("ma_liste_scenarios.add(" + scenario + ");");
+
+	table.remove("SCENARIO");
+:};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {: :};
