@@ -5,7 +5,8 @@ LEXFILE="analyzer.lex"
 CUPFILE="domusParser.cup"
 
 TESTDIR="test"
-TESTFILE="exo-simple.txt"
+TESTFILE="test.domus"
+# TESTFILE="exo-simple.txt"
 
 SEPERATOR="\n\n\n"
 DELETE="\t\e[31mDeleting\e[39m"
