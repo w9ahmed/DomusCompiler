@@ -49,7 +49,7 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item, subitem;
-non terminal pourtout_subitem, pourtout_action, si_subitem, message_subitem, programmer_subset, associer_subitem;
+non terminal pourtout_subitem, pourtout_action, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
@@ -143,6 +143,10 @@ si_subitem ::=
 	  IDENTIFIER:id DOT actions:app_action {::}
 	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
+sinon_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action {::}
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+
 message_subitem ::=
 	  STRING_LITERAL:s {::}
 	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {::}
@@ -193,7 +197,8 @@ item ::= POURTOUT IDENTIFIER:id1 COLON pourtout_subitem FAIRE pourtout_action SE
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
 // TO BE UPDATED THIS PART
 item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
-item ::= SINON IDENTIFIER:id DOT actions:app_action SEMI_COLON FSI SEMI_COLON {::};
+item ::= SINON sinon_subitem SEMI_COLON FSI SEMI_COLON {::};
+
 
 item ::= IDENTIFIER:id DOT ETAT {::};
 item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
@@ -204,6 +209,4 @@ item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
 item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
 
 item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {::};
-
 item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {::};
-
