@@ -234,7 +234,11 @@ pourtout_action ::=
 	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
 
-item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
+item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {:
+	writer.appendln("for(CAppareil appareil : this.l_appareils)");
+	writer.appendln("if (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
+	writer.appendln("appareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
+:};
 // TO BE UPDATED THIS PART
 item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
 item ::= SINON sinon_subitem SEMI_COLON FSI SEMI_COLON {::};
