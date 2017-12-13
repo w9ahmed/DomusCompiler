@@ -29,6 +29,7 @@ action code {:
 	Hashtable< String, String > table = new Hashtable< String, String >();
 	Stack<String> stack = new Stack<String>();
 	int programmerCount = 0;
+	List scenarii = new ArrayList(); 
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -80,8 +81,10 @@ item ::= DECLARATION_SCENARII_OPEN_TAG:s {: :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
-	table.put("SCENARIO", Utils.retrieveName(s));
-	writer.appendln("String " + Utils.retrieveName(s) + "_contenu = \"\\n");
+	String scenario = Utils.retrieveName(s);
+	scenarii.add(scenario);
+	table.put("SCENARIO", scenario);
+	writer.appendln("String " + scenario + "_contenu = \"\\n");
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
 	String scenario = table.get("SCENARIO");
@@ -139,9 +142,9 @@ states ::=
 	| FERME:s {: RESULT = s; :};
 
 message_subitem ::=
-	  STRING_LITERAL:s {::}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {::}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {::};
+	  STRING_LITERAL:s {: RESULT = ((String) s).replaceAll("\"", ""); :}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {: RESULT = s; :}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {: RESULT = s; :};
 
 
 // APPAREIL
@@ -256,9 +259,13 @@ sinon_subitem ::=
 item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
 item ::= FSI SEMI_COLON {::};
 
-item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
+item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {:
+	writer.appendln("this.execScenarioNum(" + scenarii.indexOf(id) + ");\\n");
+:};
 
-item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
+item ::= MESSAGE PARANTHESES_OPEN message_subitem:message PARANTHESES_CLOSE SEMI_COLON {:
+	writer.appendln("System.out.println(\\\"" + message + "\\\");\n");
+:};
 
 item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {:
 	while(!stack.isEmpty()) {
