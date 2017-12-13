@@ -85,6 +85,11 @@ move_files() {
 	then
 		mv CMaisonUser.java generated/
 	fi
+
+	if [ -f HabitatSpecific.java ]
+	then
+		mv HabitatSpecific.java generated/
+	fi
 }
 
 compile() {

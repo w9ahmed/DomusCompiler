@@ -224,21 +224,27 @@ interfaces_subitem ::=
 
 
 item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_COLON {:
+	String forStmt = "for(CAppareil appareil : this.l_appareils)";
 	String action = table.remove("POURTOUT_ACTION");
 
 	if(table.get("POURTOUT_APPAREIL") != null) {
-		writer1.appendln("for(CAppareil appareil : this.l_appareils)");
+		writer1.appendln(forStmt);
+		writer2.appendln(forStmt);
 		String appareil = table.remove("POURTOUT_APPAREIL");
 		writer1.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
+		writer2.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))");
 	}
 
 	if(table.get("POURTOUT_AUTRE_APPAREIL") != null) {
-		writer1.appendln("for(CAppareil appareil : this.l_appareils)");
+		writer1.appendln(forStmt);
+		writer2.appendln(forStmt);
 		table.remove("POURTOUT_AUTRE_APPAREIL");
 		writer1.appendln("\tif (appareil.estTypeAutreAppareil()\\n");
+		writer2.appendln("\tif (appareil.estTypeAutreAppareil()");
 	}
 	
 	writer1.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
+	writer2.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");");
 :};
 pourtout_subitem ::=
 	  IDENTIFIER:id COLON appareils:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
@@ -246,7 +252,12 @@ pourtout_subitem ::=
 		writer1.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
 		writer1.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
 		writer1.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
-	:} 
+
+		// Habitat
+		writer2.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
+		writer2.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\"" + ((String)a) + "\"))");
+		writer2.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
+	:}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_AUTRE_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE {:
 		table.put("POURTOUT_APPAREIL", "autre_appareil_" + (String)a);
@@ -260,6 +271,11 @@ item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {:
 	writer1.appendln("for(CAppareil appareil : this.l_appareils)");
 	writer1.appendln("\tif (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
 	writer1.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
+
+	// Habitat
+	writer2.appendln("for(CAppareil appareil : this.l_appareils)");
+	writer2.appendln("\tif (appareil.getNomAppareil().equals(\"" + (String)id + "\"))");
+	writer2.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");");
 :};
 // TO BE UPDATED THIS PART
 item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
@@ -269,6 +285,12 @@ si_condition ::=
 		writer1.appendln("\tif(appareil.getNomAppareil().equals(\\\"" + id + "\\\"))\\n");
 		writer1.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))\\n");
 		writer1.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);\\n");
+
+		// Habitat
+		writer2.appendln("for(CAppareil appareil : this.l_appareils)");
+		writer2.appendln("\tif(appareil.getNomAppareil().equals(\"" + id + "\"))");
+		writer2.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))");
+		writer2.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);");
 	:};
 si_subitem ::=
 	  IDENTIFIER:id DOT actions:app_action {::}
