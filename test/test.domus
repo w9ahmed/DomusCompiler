@@ -1,5 +1,5 @@
 <PROGRAMME_DOMUS>
-	// Commentaire : declaration des appareils
+	// Commentaire : dÃ©claration des appareils
 	<DECLARATION_APPAREILS>
 		eclairage e1, e2, e3.
 		volet v1, v2, v3, v4.
@@ -8,21 +8,21 @@
 		fenetre fen.
 		autre_appareil(cafetiere) cafe.
 		autre_appareil(hifi) hf.
-
+		
 		// déclaration d'un ensemble d'appareils (type énumeré utilisateur)
 		definir mon_eclairage_salon = {e2,e3}.
 	</DECLARATION_APPAREILS>
 
 	// déclaration des interfaces
-		<DECLARATION_INTERFACES>
+	<DECLARATION_INTERFACES>
 		interrupteur b1, b2.
 		mobile t1.
 		telecommande c1.
 	</DECLARATION_INTERFACES>
 
-	// déclaration des scenarii
+	// dÃ©claration des scenarii
 	<DECLARATION_SCENARII>
-		// déclaration du scenario bonjour
+		// dÃ©claration du scenario bonjour
 		<SCENARIO bonjour>
 			pourtout v:volet faire v.ouvrir; fait;
 			a1.eteindre;
@@ -30,17 +30,17 @@
 			si (rad1.etat == eteint) alors rad1.allumer; fsi;
 			hf.allumer;
 		</SCENARIO bonjour>
-		// déclaration du scenario soiree
+
 		<SCENARIO soiree>
 			pourtout v:volet faire v.fermer; fait;
 			pourtout e:mon_eclairage_salon faire e.allumer; fait;
 		</SCENARIO soiree>
-		// déclaration du scenario soiree musique
+
 		<SCENARIO soiree_musique>
-				executer_scenario soiree; 
-				pourtout e:autre_appareil(hifi) faire e.allumer; fait;
+			executer_scenario soiree; 
+			pourtout e:autre_appareil(hifi) faire e.allumer; fait;
 		</SCENARIO soiree_musique>
-		// déclaration du scenario depart
+
 		<SCENARIO depart>
 			message("Scenario Départ");
 			pourtout v:volet faire v.fermer; fait;
@@ -49,5 +49,29 @@
 			si (fen.etat == ferme) alors a1.allumer; 
 			sinon message("Attention : la fenÃªtre ",fen," est ouverte !"); fsi;
 		</SCENARIO depart>
-	<DECLARATION_SCENARII>
+
+		<SCENARIO noel1>
+			e1.allumer;
+		</SCENARIO noel1>
+	
+		<SCENARIO noel2>
+			e2.allumer;
+		</SCENARIO noel2>
+		
+		<SCENARIO noel3>
+			e3.allumer;
+		</SCENARIO noel3>
+	</DECLARATION_SCENARII>
+
+	// dÃ©claration des commandes
+	<DECLARATION_COMMANDES>
+		associer b1 = bonjour.
+		associer b2 = depart.
+		associer t1 = depart.
+		associer c1 = {noel1,noel2,noel3}.
+
+		// le scenario soirÃ©e est lancÃ© tous les soirs du premier jour de chaque mois 2017 Ã  18h.
+		programmer soiree = (2017,_,1,18,0).    
+		programmer soiree_musique = {(2017,11,20,19,30),(2017,11,21,19,30)}.
+	</DECLARATION_COMMANDES>
 </PROGRAMME_DOMUS>

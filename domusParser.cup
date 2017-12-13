@@ -1,5 +1,5 @@
 import java_cup.runtime.*;
-import java.util.Stack;
+import java.util.*;
 
 parser code {:
 	public static void main(String args[]) throws Exception {
@@ -26,6 +26,10 @@ parser code {:
 
 action code {:
 	Writer writer = new Writer("CMaisonUser.java");
+	Hashtable< String, String > table = new Hashtable< String, String >();
+	Stack<String> stack = new Stack<String>();
+	int programmerCount = 0;
+	List scenarii = new ArrayList(); 
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -48,8 +52,9 @@ terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
 // interface
 terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
-non terminal expr, list, item, subitem;
-non terminal pourtout_subitem, pourtout_action, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
+non terminal expr, list, item;
+non terminal appareils_subitem, interfaces_subitem, autre_appareils_subitem, definir_subitem;
+non terminal pourtout_subitem, pourtout_action, si_condition, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
@@ -75,8 +80,20 @@ item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {: :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
-item ::= SCENARIO_OPEN_TAG:s {: :};
-item ::= SCENARIO_CLOSE_TAG:s {: :};
+item ::= SCENARIO_OPEN_TAG:s {:
+	String scenario = Utils.retrieveName(s);
+	scenarii.add(scenario);
+	table.put("SCENARIO", scenario);
+	writer.appendln("String " + scenario + "_contenu = \"\\n");
+:};
+item ::= SCENARIO_CLOSE_TAG:s {:
+	String scenario = table.get("SCENARIO");
+	writer.appendln("\";");
+	writer.appendln("CScenario " + scenario + " = new CScenario(\"" + scenario + "\", " + scenario + "_contenu);");
+	writer.appendln("ma_liste_scenarios.add(" + scenario + ");");
+
+	table.remove("SCENARIO");
+:};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
 item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {: :};
@@ -124,89 +141,157 @@ states ::=
 	| OUVERT:s {: RESULT = s; :}
 	| FERME:s {: RESULT = s; :};
 
-subitem ::=
-	  COMMA IDENTIFIER:identifier subitem:a {: RESULT = identifier; :}
-	| CURLY_BRACKET_CLOSE DOT {::}
-	| DOT {::};
+message_subitem ::=
+	  STRING_LITERAL:s {: RESULT = ((String) s).replaceAll("\"", ""); :}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {: RESULT = s; :}
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {: RESULT = s; :};
 
+
+// APPAREIL
+item ::= appareils:a appareils_subitem {:
+	// TODO Update class name for VOLET to VoletFENETRE
+	String appareils = (String) a;
+	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
+	while(!stack.isEmpty()) {
+		String identifier = stack.pop();
+		writer.appendln(className + " " + identifier + " = new " + className + "(\"" + identifier + "\", TypeAppareil." + appareils.toUpperCase() + ");");
+		writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+	}
+:};
+appareils_subitem ::=
+	  IDENTIFIER:id DOT {: stack.push(id); :}
+	| IDENTIFIER:id COMMA appareils_subitem {: stack.push(id); :};
+
+
+// AUTRE APPAREIL
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE autre_appareils_subitem {:
+	String appareils = (String) ap;
+	while(!stack.isEmpty()) {
+		String identifier = stack.pop();
+		writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
+		writer.appendln("ma_liste_appareils.add(" + identifier + ");");
+	}
+:};
+autre_appareils_subitem ::=
+	  IDENTIFIER:id DOT {: stack.push(id); :}
+	| IDENTIFIER:id COMMA autre_appareils_subitem {: stack.push(id); :};
+
+
+// DEFINIR
+item::= DEFINIR IDENTIFIER:id ASSIGN CURLY_BRACKET_OPEN definir_subitem CURLY_BRACKET_CLOSE DOT {:
+	writer.appendln("CEnsAppareil " + id + " = new CAutreAppareil(\"" + id + "\");");
+	while(!stack.isEmpty()) {
+		String identifier = stack.pop();
+		writer.appendln(id + ".add(" + identifier + ");");
+	}
+	writer.appendln("ma_liste_ens_appareils.add(" + id + ");");
+:};
+definir_subitem ::=
+	  IDENTIFIER:id {: stack.push(id); :}
+	| IDENTIFIER:id COMMA definir_subitem {: stack.push(id); :};
+
+// INTERFACE
+item ::= interfaces:i interfaces_subitem {:
+	String interfaceName = (String) i;
+	while(!stack.isEmpty()) {
+		String identifier = stack.pop();
+		writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
+		writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
+	}
+:};
+interfaces_subitem ::=
+	  IDENTIFIER:id DOT {: stack.push(id); :}
+	| IDENTIFIER:id COMMA interfaces_subitem {: stack.push(id); :};
+
+
+item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_COLON {:
+	String action = table.remove("POURTOUT_ACTION");
+
+	if(table.get("POURTOUT_APPAREIL") != null) {
+		writer.appendln("for(CAppareil appareil : this.l_appareils)");
+		String appareil = table.remove("POURTOUT_APPAREIL");
+		writer.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
+	}
+	
+	writer.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
+:};
 pourtout_subitem ::=
-	  appareils:a {::}
-	| IDENTIFIER:a {::} 
-	| AUTRE_APPAREIL {::}
-	| AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE {::};
-
+	  IDENTIFIER:id COLON appareils:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
+	| IDENTIFIER:id COLON IDENTIFIER:a {: 
+		writer.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
+		writer.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
+		writer.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
+	:} 
+	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
+	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE {:
+		table.put("POURTOUT_APPAREIL", "autre_appareil_" + (String)a);
+	:};
 pourtout_action ::=
-	  IDENTIFIER:id2 DOT actions:app_action
+	  IDENTIFIER:id DOT actions:aa {: table.put("POURTOUT_ACTION", (String)aa); :}
 	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
+
+item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {:
+	writer.appendln("for(CAppareil appareil : this.l_appareils)");
+	writer.appendln("\tif (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
+	writer.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
+:};
+// TO BE UPDATED THIS PART
+item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
+si_condition ::=
+	 IDENTIFIER:id DOT ETAT EQUALS states:state  {:
+		writer.appendln("for(CAppareil appareil : this.l_appareils)");
+		writer.appendln("\tif(appareil.getNomAppareil().equals(\\\"" + id + "\\\"))\\n");
+		writer.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))\\n");
+		writer.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);\\n");
+	:};
 si_subitem ::=
 	  IDENTIFIER:id DOT actions:app_action {::}
 	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
+
+item ::= SINON sinon_subitem SEMI_COLON FSI SEMI_COLON {::};
 sinon_subitem ::=
 	  IDENTIFIER:id DOT actions:app_action {::}
 	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
-message_subitem ::=
-	  STRING_LITERAL:s {::}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {::}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {::}
-	| {::};
-
-programmer_subset ::=
-	  DATE {::}
-	| CURLY_BRACKET_OPEN DATE COMMA programmer_subset CURLY_BRACKET_CLOSE {::}
-	| {::};
-
-associer_subitem ::=
-	  IDENTIFIER:id {::}
-	| IDENTIFIER:id COMMA associer_subitem {::}
-	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::}
-	| {::};
-
-item ::= appareils:a IDENTIFIER:identifier subitem:si {:
-	// TODO Update class name for VOLET to FENETRE
-	String appareils = (String) a;
-	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
-	writer.appendln(className + " " + identifier + " = new " + className + "(\"" + identifier + "\", TypeAppareil." + appareils.toUpperCase() + ");");
-	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
-:};
-
-item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE IDENTIFIER:identifier subitem:si {:
-	String appareils = (String) ap;
-	writer.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
-	writer.appendln("ma_liste_appareils.add(" + identifier + ");");
-:};
-
-
-item::= DEFINIR IDENTIFIER:identifier1 ASSIGN CURLY_BRACKET_OPEN IDENTIFIER:identifier2 subitem:si {:
-	writer.appendln("CEnsAppareil " + identifier1 + " = new CAutreAppareil(\"" + identifier1 + "\");");
-	writer.appendln(identifier1 + ".add(" + identifier2 + ");");
-	writer.appendln("ma_liste_ens_appareils.add(" + identifier1 + ");");
-:};
-
-item ::= interfaces:i IDENTIFIER:identifier subitem:si {:
-	String interfaceName = (String) i;
-	writer.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
-	writer.appendln("ma_liste_interfaces.add(" + identifier + ");");
-:};
-
-
-item ::= POURTOUT IDENTIFIER:id1 COLON pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_COLON {::};
-
-item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {::};
-// TO BE UPDATED THIS PART
-item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
-item ::= SINON sinon_subitem SEMI_COLON FSI SEMI_COLON {::};
-
-
-item ::= IDENTIFIER:id DOT ETAT {::};
+// item ::= IDENTIFIER:id DOT ETAT {::};
 item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
 item ::= FSI SEMI_COLON {::};
 
-item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {::};
+item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {:
+	writer.appendln("this.execScenarioNum(" + scenarii.indexOf(id) + ");\\n");
+:};
 
-item ::= MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON {::};
+item ::= MESSAGE PARANTHESES_OPEN message_subitem:message PARANTHESES_CLOSE SEMI_COLON {:
+	writer.appendln("System.out.println(\\\"" + message + "\\\");\n");
+:};
 
-item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {::};
-item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {::};
+item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {:
+	while(!stack.isEmpty()) {
+		String scenario = stack.pop();
+		writer.appendln(id + ".addScenarioAssocie(\"" + scenario +"\");");
+	}
+:};
+associer_subitem ::=
+	  IDENTIFIER:id {: stack.push(id); :}
+	| IDENTIFIER:id COMMA associer_subitem {: stack.push(id); :}
+	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE {::};
+
+item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {:
+	String className = "p" + ++programmerCount;
+	writer.appendln("CProgrammation " + className + " = new CProgrammation(\"" + id + "\");");
+
+	int count = 1;
+	while(!stack.isEmpty()) {
+		String dateClassName = className + "d" + count;
+		writer.appendln("CDate " + dateClassName + " = new CDate" + stack.pop() + ";");
+		writer.appendln(className + ".addDate(" + dateClassName + ");");
+		count++;
+	}
+	writer.appendln("ma_liste_programmations.add(" + className + ");");
+:};
+programmer_subset ::=
+	  DATE:date {: stack.push(Utils.fixDate(date)); :}
+	| DATE:date COMMA programmer_subset {: stack.push(Utils.fixDate(date)); :}
+	| CURLY_BRACKET_OPEN programmer_subset CURLY_BRACKET_CLOSE {::};
