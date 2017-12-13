@@ -53,7 +53,7 @@ terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
 
 non terminal expr, list, item;
 non terminal appareils_subitem, interfaces_subitem, autre_appareils_subitem, definir_subitem;
-non terminal pourtout_subitem, pourtout_action, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
+non terminal pourtout_subitem, pourtout_action, si_condition, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
@@ -81,7 +81,7 @@ item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
 	table.put("SCENARIO", Utils.retrieveName(s));
-	writer.append("String " + Utils.retrieveName(s) + "_contenu = \"\\n");
+	writer.appendln("String " + Utils.retrieveName(s) + "_contenu = \"\\n");
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
 	String scenario = table.get("SCENARIO");
@@ -137,14 +137,6 @@ states ::=
 	| ECO:s {: RESULT = s; :}
 	| OUVERT:s {: RESULT = s; :}
 	| FERME:s {: RESULT = s; :};
-
-si_subitem ::=
-	  IDENTIFIER:id DOT actions:app_action {::}
-	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
-
-sinon_subitem ::=
-	  IDENTIFIER:id DOT actions:app_action {::}
-	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
 message_subitem ::=
 	  STRING_LITERAL:s {::}
@@ -215,17 +207,17 @@ item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_CO
 	if(table.get("POURTOUT_APPAREIL") != null) {
 		writer.appendln("for(CAppareil appareil : this.l_appareils)");
 		String appareil = table.remove("POURTOUT_APPAREIL");
-		writer.appendln("if (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
+		writer.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
 	}
 	
-	writer.appendln("appareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
+	writer.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
 :};
 pourtout_subitem ::=
 	  IDENTIFIER:id COLON appareils:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON IDENTIFIER:a {: 
 		writer.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
-		writer.appendln("if (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
-		writer.appendln("for(CAppareil appareil : ensAppareil.l_appareils)");
+		writer.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
+		writer.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
 	:} 
 	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE {: table.put("POURTOUT_APPAREIL", (String)a); :};
@@ -236,15 +228,29 @@ pourtout_action ::=
 
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {:
 	writer.appendln("for(CAppareil appareil : this.l_appareils)");
-	writer.appendln("if (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
-	writer.appendln("appareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
+	writer.appendln("\tif (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
+	writer.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
 :};
 // TO BE UPDATED THIS PART
-item ::= SI PARANTHESES_OPEN item EQUALS states:state PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
+item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
+si_condition ::=
+	 IDENTIFIER:id DOT ETAT EQUALS states:state  {:
+		writer.appendln("for(CAppareil appareil : this.l_appareils)");
+		writer.appendln("\tif(appareil.getNomAppareil().equals(\\\"" + id + "\\\"))\\n");
+		writer.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))\\n");
+		writer.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);\\n");
+	:};
+si_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action {::}
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+
+
 item ::= SINON sinon_subitem SEMI_COLON FSI SEMI_COLON {::};
+sinon_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action {::}
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
 
-
-item ::= IDENTIFIER:id DOT ETAT {::};
+// item ::= IDENTIFIER:id DOT ETAT {::};
 item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
 item ::= FSI SEMI_COLON {::};
 
