@@ -212,6 +212,12 @@ item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_CO
 		String appareil = table.remove("POURTOUT_APPAREIL");
 		writer.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
 	}
+
+	if(table.get("POURTOUT_AUTRE_APPAREIL") != null) {
+		writer.appendln("for(CAppareil appareil : this.l_appareils)");
+		table.remove("POURTOUT_AUTRE_APPAREIL");
+		writer.appendln("\tif (appareil.estTypeAutreAppareil()\\n");
+	}
 	
 	writer.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
 :};
@@ -222,7 +228,7 @@ pourtout_subitem ::=
 		writer.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
 		writer.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
 	:} 
-	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
+	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_AUTRE_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE {:
 		table.put("POURTOUT_APPAREIL", "autre_appareil_" + (String)a);
 	:};
