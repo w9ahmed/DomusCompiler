@@ -21,6 +21,10 @@ public class Appareil {
         return this.classType;
     }
 
+    public String generateCodeForIdent(String ident) {
+        return this.getClassType() + " " + ident + " = new " + this.getClassType() + "(\"" + ident + "\", TypeAppareil." + this.getName().toUpperCase() + ");" + "\nma_liste_appareils.add(" + ident + ");";
+    }
+
     public String toString() {
         return " ";
     }

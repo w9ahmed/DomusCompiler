@@ -25,16 +25,15 @@ parser code {:
 :}
 
 action code {:
-	Writer writer1 = new Writer("CMaisonUser.java");
-	Writer writer2 = new Writer("HabitatSpecific.java");
-
 	DomusProgram domus;
 	Scenario scenario;
+	List<Appareil> appareils = new ArrayList<Appareil>();
 
 	Hashtable< String, String > table = new Hashtable< String, String >();
 	Stack<String> stack = new Stack<String>();
 	int programmerCount = 0;
-	List scenarii = new ArrayList(); 
+	List scenarii = new ArrayList();
+	List<Object> code = new ArrayList<Object>();
 :}
 
 terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
@@ -63,17 +62,17 @@ non terminal pourtout_subitem, pourtout_action, si_condition, si_subitem, sinon_
 non terminal appareils, autre_appareils, interfaces, actions, states;
 
 expr ::= list {:
-	System.out.println("\n\nAnalyse terminee!");
-:} | {: System.out.println("Entree vide!"); :};
+	System.out.println("\n\nSucessfully compiled!");
+:} | {: System.out.println("Empty domus file!"); :};
 
 list ::= item list | item;
 
 // COMMENTS
-item ::= LINE_COMMENT:s {: writer1.appendln(s); :};
-item ::= BLOCK_COMMENT:s {: writer1.appendln(s); :};
+item ::= LINE_COMMENT:s {: code.add(new Comment(s)); domus.writerMaisonln(s); :};
+item ::= BLOCK_COMMENT:s {: code.add(new Comment(s)); domus.writerMaisonln(s); :};
 
 // TAGS
-item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: writer1.createFile(); domus = new DomusProgram(); :};
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: domus = new DomusProgram(); :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: :};
@@ -88,26 +87,24 @@ item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 item ::= SCENARIO_OPEN_TAG:s {:
 	scenario = new Scenario(s);
 
-	scenarii.add(scenario);
+	scenarii.add(scenario.getName());
 	table.put("SCENARIO", scenario.getName());
-	writer1.appendln("String " + scenario.getName() + "_contenu = \"\\n");
+	domus.writerMaisonln("String " + scenario.getName() + "_contenu = \"\\n");
 
-	writer2.appendln(
+	domus.writerHabitatln(
 		"\tcase " + scenarii.indexOf(scenario.getName()) + ": "
 		+ "// Scenario " + scenario.getName()
 	);
-	
-	System.out.println(RESULT);
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
 	String scenario = table.get("SCENARIO");
-	writer1.appendln("\";");
-	writer1.appendln("CScenario " + scenario + " = new CScenario(\"" + scenario + "\", " + scenario + "_contenu);");
-	writer1.appendln("ma_liste_scenarios.add(" + scenario + ");");
+	domus.writerMaisonln("\";");
+	domus.writerMaisonln("CScenario " + scenario + " = new CScenario(\"" + scenario + "\", " + scenario + "_contenu);");
+	domus.writerMaisonln("ma_liste_scenarios.add(" + scenario + ");");
 
 	table.remove("SCENARIO");
 
-	writer2.appendln("\tbreak;");
+	domus.writerHabitatln("\tbreak;");
 	scenario = null;
 :};
 
@@ -164,16 +161,15 @@ message_subitem ::=
 
 
 // APPAREIL
-item ::= appareils:a appareils_subitem {:
+item ::= appareils:a appareils_subitem:id {:
 	Appareil appareil = new Appareil(a);
 	while(!stack.isEmpty()) {
 		String identifier = stack.pop();
-		writer1.appendln(appareil.getClassType() + " " + identifier + " = new " + appareil.getClassType() + "(\"" + identifier + "\", TypeAppareil." + appareil.getName().toUpperCase() + ");");
-		writer1.appendln("ma_liste_appareils.add(" + identifier + ");");
+		domus.writerMaisonln(appareil.generateCodeForIdent(identifier));
 	}
 :};
 appareils_subitem ::=
-	  IDENTIFIER:id DOT {: stack.push(id); :}
+	  IDENTIFIER:id DOT {: RESULT = id; :}
 	| IDENTIFIER:id COMMA appareils_subitem {: stack.push(id); :};
 
 
@@ -182,8 +178,8 @@ item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE au
 	String appareils = (String) ap;
 	while(!stack.isEmpty()) {
 		String identifier = stack.pop();
-		writer1.appendln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
-		writer1.appendln("ma_liste_appareils.add(" + identifier + ");");
+		domus.writerMaisonln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
+		domus.writerMaisonln("ma_liste_appareils.add(" + identifier + ");");
 	}
 :};
 autre_appareils_subitem ::=
@@ -193,12 +189,12 @@ autre_appareils_subitem ::=
 
 // DEFINIR
 item::= DEFINIR IDENTIFIER:id ASSIGN CURLY_BRACKET_OPEN definir_subitem CURLY_BRACKET_CLOSE DOT {:
-	writer1.appendln("CEnsAppareil " + id + " = new CAutreAppareil(\"" + id + "\");");
+	domus.writerMaisonln("CEnsAppareil " + id + " = new CAutreAppareil(\"" + id + "\");");
 	while(!stack.isEmpty()) {
 		String identifier = stack.pop();
-		writer1.appendln(id + ".add(" + identifier + ");");
+		domus.writerMaisonln(id + ".add(" + identifier + ");");
 	}
-	writer1.appendln("ma_liste_ens_appareils.add(" + id + ");");
+	domus.writerMaisonln("ma_liste_ens_appareils.add(" + id + ");");
 :};
 definir_subitem ::=
 	  IDENTIFIER:id {: stack.push(id); :}
@@ -209,8 +205,8 @@ item ::= interfaces:i interfaces_subitem {:
 	String interfaceName = (String) i;
 	while(!stack.isEmpty()) {
 		String identifier = stack.pop();
-		writer1.appendln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
-		writer1.appendln("ma_liste_interfaces.add(" + identifier + ");");
+		domus.writerMaisonln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
+		domus.writerMaisonln("ma_liste_interfaces.add(" + identifier + ");");
 	}
 :};
 interfaces_subitem ::=
@@ -223,35 +219,35 @@ item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_CO
 	String action = table.remove("POURTOUT_ACTION");
 
 	if(table.get("POURTOUT_APPAREIL") != null) {
-		writer1.appendln(forStmt);
-		writer2.appendln(forStmt);
+		domus.writerMaisonln(forStmt);
+		domus.writerHabitatln(forStmt);
 		String appareil = table.remove("POURTOUT_APPAREIL");
-		writer1.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
-		writer2.appendln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))");
+		domus.writerMaisonln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))\\n");
+		domus.writerHabitatln("\tif (appareil.typeAppareil.equals(TypeAppareil." + appareil.toUpperCase() + "))");
 	}
 
 	if(table.get("POURTOUT_AUTRE_APPAREIL") != null) {
-		writer1.appendln(forStmt);
-		writer2.appendln(forStmt);
+		domus.writerMaisonln(forStmt);
+		domus.writerHabitatln(forStmt);
 		table.remove("POURTOUT_AUTRE_APPAREIL");
-		writer1.appendln("\tif (appareil.estTypeAutreAppareil()\\n");
-		writer2.appendln("\tif (appareil.estTypeAutreAppareil()");
+		domus.writerMaisonln("\tif (appareil.estTypeAutreAppareil()\\n");
+		domus.writerHabitatln("\tif (appareil.estTypeAutreAppareil()");
 	}
 	
-	writer1.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
-	writer2.appendln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");");
+	domus.writerMaisonln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");\\n");
+	domus.writerHabitatln("\t\tappareil.appliquer(TypeActionAppareil." + action.toUpperCase() + ");");
 :};
 pourtout_subitem ::=
 	  IDENTIFIER:id COLON appareils:a {: table.put("POURTOUT_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON IDENTIFIER:a {: 
-		writer1.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
-		writer1.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
-		writer1.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
+		domus.writerMaisonln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
+		domus.writerMaisonln("\tif (ensAppareil.nomEnsAppareil.equals(\\\"" + ((String)a) + "\\\"))\\n");
+		domus.writerMaisonln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
 
 		// Habitat
-		writer2.appendln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
-		writer2.appendln("\tif (ensAppareil.nomEnsAppareil.equals(\"" + ((String)a) + "\"))");
-		writer2.appendln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
+		domus.writerHabitatln("for(CEnsAppareil ensAppareil : this.l_ensembles)");
+		domus.writerHabitatln("\tif (ensAppareil.nomEnsAppareil.equals(\"" + ((String)a) + "\"))");
+		domus.writerHabitatln("\t\tfor(CAppareil appareil : ensAppareil.l_appareils)");
 	:}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL:a {: table.put("POURTOUT_AUTRE_APPAREIL", (String)a); :}
 	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE {:
@@ -263,29 +259,29 @@ pourtout_action ::=
 
 
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON {:
-	writer1.appendln("for(CAppareil appareil : this.l_appareils)");
-	writer1.appendln("\tif (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
-	writer1.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
+	domus.writerMaisonln("for(CAppareil appareil : this.l_appareils)");
+	domus.writerMaisonln("\tif (appareil.getNomAppareil().equals(\\\" " + (String)id + " \\\"))\\n");
+	domus.writerMaisonln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");\\n");
 
 	// Habitat
-	writer2.appendln("for(CAppareil appareil : this.l_appareils)");
-	writer2.appendln("\tif (appareil.getNomAppareil().equals(\"" + (String)id + "\"))");
-	writer2.appendln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");");
+	domus.writerHabitatln("for(CAppareil appareil : this.l_appareils)");
+	domus.writerHabitatln("\tif (appareil.getNomAppareil().equals(\"" + (String)id + "\"))");
+	domus.writerHabitatln("\t\tappareil.appliquer(TypeActionAppareil." + ((String)app_action).toUpperCase() + ");");
 :};
 // TO BE UPDATED THIS PART
 item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
 si_condition ::=
 	 IDENTIFIER:id DOT ETAT EQUALS states:state  {:
-		writer1.appendln("for(CAppareil appareil : this.l_appareils)");
-		writer1.appendln("\tif(appareil.getNomAppareil().equals(\\\"" + id + "\\\"))\\n");
-		writer1.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))\\n");
-		writer1.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);\\n");
+		domus.writerMaisonln("for(CAppareil appareil : this.l_appareils)");
+		domus.writerMaisonln("\tif(appareil.getNomAppareil().equals(\\\"" + id + "\\\"))\\n");
+		domus.writerMaisonln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))\\n");
+		domus.writerMaisonln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);\\n");
 
 		// Habitat
-		writer2.appendln("for(CAppareil appareil : this.l_appareils)");
-		writer2.appendln("\tif(appareil.getNomAppareil().equals(\"" + id + "\"))");
-		writer2.appendln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))");
-		writer2.appendln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);");
+		domus.writerHabitatln("for(CAppareil appareil : this.l_appareils)");
+		domus.writerHabitatln("\tif(appareil.getNomAppareil().equals(\"" + id + "\"))");
+		domus.writerHabitatln("\t\tif(appareil.etatAppareil.equals(TypeEtatAppareil.ETEINT))");
+		domus.writerHabitatln("\t\t\tappareil.appliquer(TypeActionAppareil.ALLUMER);");
 	:};
 si_subitem ::=
 	  IDENTIFIER:id DOT actions:app_action {::}
@@ -302,17 +298,17 @@ item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
 item ::= FSI SEMI_COLON {::};
 
 item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON {:
-	writer1.appendln("this.execScenarioNum(" + scenarii.indexOf(id) + ");\\n");
+	domus.writerMaisonln("this.execScenarioNum(" + scenarii.indexOf(id) + ");\\n");
 :};
 
 item ::= MESSAGE PARANTHESES_OPEN message_subitem:message PARANTHESES_CLOSE SEMI_COLON {:
-	writer1.appendln("System.out.println(\\\"" + message + "\\\");\n");
+	domus.writerMaisonln("System.out.println(\\\"" + message + "\\\");\n");
 :};
 
 item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT {:
 	while(!stack.isEmpty()) {
 		String scenario = stack.pop();
-		writer1.appendln(id + ".addScenarioAssocie(\"" + scenario +"\");");
+		domus.writerMaisonln(id + ".addScenarioAssocie(\"" + scenario +"\");");
 	}
 :};
 associer_subitem ::=
@@ -322,16 +318,16 @@ associer_subitem ::=
 
 item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT {:
 	String className = "p" + ++programmerCount;
-	writer1.appendln("CProgrammation " + className + " = new CProgrammation(\"" + id + "\");");
+	domus.writerMaisonln("CProgrammation " + className + " = new CProgrammation(\"" + id + "\");");
 
 	int count = 1;
 	while(!stack.isEmpty()) {
 		String dateClassName = className + "d" + count;
-		writer1.appendln("CDate " + dateClassName + " = new CDate" + stack.pop() + ";");
-		writer1.appendln(className + ".addDate(" + dateClassName + ");");
+		domus.writerMaisonln("CDate " + dateClassName + " = new CDate" + stack.pop() + ";");
+		domus.writerMaisonln(className + ".addDate(" + dateClassName + ");");
 		count++;
 	}
-	writer1.appendln("ma_liste_programmations.add(" + className + ");");
+	domus.writerMaisonln("ma_liste_programmations.add(" + className + ");");
 :};
 programmer_subset ::=
 	  DATE:date {: stack.push(Utils.fixDate(date)); :}

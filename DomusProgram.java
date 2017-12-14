@@ -33,6 +33,38 @@ public class DomusProgram {
         };
     }
 
+    public void writerMaison(String code) {
+        try {
+            this.writer1.append(code); 
+        } catch(Exception e) {
+            System.out.println("Failed to write to " + MAISON_USER);
+        }
+    }
+
+    public void writerMaisonln(String code) {
+        try {
+            this.writer1.appendln(code); 
+        } catch(Exception e) {
+            System.out.println("Failed to write to " + MAISON_USER);
+        }
+    }
+
+    public void writerHabitat(String code) {
+        try {
+            this.writer2.append(code); 
+        } catch(Exception e) {
+            System.out.println("Failed to write to " + HABITAT_SPECIFIC);
+        }
+    }
+
+    public void writerHabitatln(String code) {
+        try {
+            this.writer2.appendln(code); 
+        } catch(Exception e) {
+            System.out.println("Failed to write to " + HABITAT_SPECIFIC);
+        }
+    }
+
     public Writer getMaison() {
         return writer1;
     }
