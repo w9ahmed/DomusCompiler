@@ -59,6 +59,8 @@ import java_cup.runtime.Symbol;
 "allumer_partiel" { return new Symbol(sym.ALLUMER_PARTIEL, new String(yytext())); }
 "allumer_eco" { return new Symbol(sym.ALLUMER_ECO, new String(yytext())); }
 "ouvrir_partiel" { return new Symbol(sym.OUVRIR_PARTIEL, new String(yytext())); }
+"fermer_partiel" { return new Symbol(sym.FERMER_PARTIEL, new String(yytext())); }
+
 
 "etat" { return new Symbol(sym.ETAT, new String(yytext())); }
 "allume" { return new Symbol(sym.ALLUME, new String(yytext())); }
@@ -80,7 +82,7 @@ import java_cup.runtime.Symbol;
 "telephone" { return new Symbol(sym.TELEPHONE, new String(yytext())); }
 "telecommande" { return new Symbol(sym.TELECOMMANDE, new String(yytext())); }
 
-"tablette" { return new Symbol(sym.TABLETTE); }
+"tablette" { return new Symbol(sym.TABLETTE, new String(yytext())); }
 "tv" { return new Symbol(sym.TV); }
 "hifi" { return new Symbol(sym.HIFI); }
 "cafetiere" { return new Symbol(sym.CAFETIERE); }

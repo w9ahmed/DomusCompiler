@@ -2,7 +2,7 @@
 
 
 LEXFILE="analyzer.lex"
-CUPFILE="domusParser.cup"
+CUPFILE="dParser.cup"
 
 TESTDIR="test"
 
@@ -77,6 +77,7 @@ run_parser() {
 test_all() {
 	FILE1="test.domus"
 	FILE2="exo-simple.txt"
+	FILE3="ex1ok"
 
 	echo -e '\e[34mRunning parser on file:\e[39m' $FILE1
 	java parser < "$TESTDIR/$FILE1"
@@ -85,6 +86,11 @@ test_all() {
 	echo -e $SEPERATOR
 	echo -e '\e[34mRunning parser on file:\e[39m' $FILE2
 	java parser < "$TESTDIR/$FILE2"
+	move_files
+
+	echo -e $SEPERATOR
+	echo -e '\e[34mRunning parser on file:\e[39m' $FILE3
+	java parser < "$TESTDIR/$FILE3"
 	move_files
 }
 
