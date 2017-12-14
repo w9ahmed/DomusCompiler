@@ -68,15 +68,19 @@ expr ::= list {:
 list ::= item list | item;
 
 // COMMENTS
-item ::= LINE_COMMENT:s {: code.add(new Comment(s)); domus.writerMaisonln(s); :};
-item ::= BLOCK_COMMENT:s {: code.add(new Comment(s)); domus.writerMaisonln(s); :};
+item ::= LINE_COMMENT:s {: code.add(new Comment(s)); :};
+item ::= BLOCK_COMMENT:s {: code.add(new Comment(s)); :};
 
 // TAGS
 item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: domus = new DomusProgram(); :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: :};
-item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: :};
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
+	// clean code container before defining appareil
+	// code.clear();
+	System.out.println(code);
+:};
+item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: System.out.println(code);:};
 
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
@@ -204,6 +208,7 @@ definir_subitem ::=
 item ::= interfaces:i interfaces_subitem {:
 	while(!stack.isEmpty()) {
 		Interface interf = new Interface(i, stack.pop());
+		code.add(interf);
 		domus.writerMaisonln(interf.toString());
 	}
 :};
