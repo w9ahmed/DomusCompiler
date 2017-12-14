@@ -28,6 +28,9 @@ action code {:
 	Writer writer1 = new Writer("CMaisonUser.java");
 	Writer writer2 = new Writer("HabitatSpecific.java");
 
+	DomusProgram domus;
+	Scenario scenario;
+
 	Hashtable< String, String > table = new Hashtable< String, String >();
 	Stack<String> stack = new Stack<String>();
 	int programmerCount = 0;
@@ -70,7 +73,7 @@ item ::= LINE_COMMENT:s {: writer1.appendln(s); :};
 item ::= BLOCK_COMMENT:s {: writer1.appendln(s); :};
 
 // TAGS
-item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: writer1.createFile(); :};
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: writer1.createFile(); domus = new DomusProgram(); :};
 item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: :};
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {: :};
@@ -79,29 +82,22 @@ item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: :};
 item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: :};
 item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
 
-item ::= DECLARATION_SCENARII_OPEN_TAG:s {:
-	writer2.createFile();
-	writer2.appendln(
-		"System.out.println(\"Execution du scenario \""
-		+ " + this.l_scenarios.get(num).getNomScenario() + \"... \");"
-	);
-
-	writer2.appendln(
-		"switch(num) {"
-	);
-:};
+item ::= DECLARATION_SCENARII_OPEN_TAG:s {: domus.createScenarii(); :};
 item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
 
 item ::= SCENARIO_OPEN_TAG:s {:
-	String scenario = Utils.retrieveName(s);
+	scenario = new Scenario(s);
+
 	scenarii.add(scenario);
-	table.put("SCENARIO", scenario);
-	writer1.appendln("String " + scenario + "_contenu = \"\\n");
+	table.put("SCENARIO", scenario.getName());
+	writer1.appendln("String " + scenario.getName() + "_contenu = \"\\n");
 
 	writer2.appendln(
-		"\tcase " + scenarii.indexOf(scenario) + ": "
-		+ "// Scenario " + scenario
+		"\tcase " + scenarii.indexOf(scenario.getName()) + ": "
+		+ "// Scenario " + scenario.getName()
 	);
+	
+	System.out.println(RESULT);
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
 	String scenario = table.get("SCENARIO");
@@ -112,6 +108,7 @@ item ::= SCENARIO_CLOSE_TAG:s {:
 	table.remove("SCENARIO");
 
 	writer2.appendln("\tbreak;");
+	scenario = null;
 :};
 
 item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
