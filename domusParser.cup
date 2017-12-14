@@ -176,7 +176,6 @@ appareils_subitem ::=
 
 // AUTRE APPAREIL
 item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE autre_appareils_subitem {:
-	String appareils = (String) ap;
 	while(!stack.isEmpty()) {
 		AutreAppareil autreAppareil = new AutreAppareil(ap, stack.pop());
 		code.add(autreAppareil);
@@ -203,11 +202,9 @@ definir_subitem ::=
 
 // INTERFACE
 item ::= interfaces:i interfaces_subitem {:
-	String interfaceName = (String) i;
 	while(!stack.isEmpty()) {
-		String identifier = stack.pop();
-		domus.writerMaisonln("CInterface " + identifier + " = new CInterface(\"" + identifier + "\", TypeInterface." + interfaceName.toUpperCase() + ");");
-		domus.writerMaisonln("ma_liste_interfaces.add(" + identifier + ");");
+		Interface interf = new Interface(i, stack.pop());
+		domus.writerMaisonln(interf.toString());
 	}
 :};
 interfaces_subitem ::=
