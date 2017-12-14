@@ -108,7 +108,7 @@ import java_cup.runtime.Symbol;
 ("//"[^"//"\n]*) { return new Symbol(sym.LINE_COMMENT, new String(yytext())); }
 ("/*"[^*]*"*/") { return new Symbol(sym.BLOCK_COMMENT, new String(yytext())); }
 
-([(][0-9]{4}|_),([0-9]{1,2}|_),([0-9]{1,2}|_),([0-9]{1,2}|_),([0-9]{1,2}|_)[)] { return new Symbol(sym.DATE, new String(yytext())); }
+[(]{1}([0-9]{4}|_),([0-9]{1,2}|_),([0-9]{1,2}|_),([0-9]{1,2}|_),([0-9]{1,2}|_)[)] { return new Symbol(sym.DATE, new String(yytext())); }
 
 ([a-zA-Z]+[a-zA-Z_0-9]*) { return new Symbol(sym.IDENTIFIER, new String(yytext())); }
 
