@@ -3,7 +3,6 @@ public class Comment {
     private String comment;
 
     public Comment(String comment) {
-        System.out.println(comment);
         this.comment = comment;
     }
 

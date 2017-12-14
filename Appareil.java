@@ -1,10 +1,12 @@
 public class Appareil {
 
-    String name;
-    String classType;
+    private String name;
+    private String ident;
+    private String classType;
 
-    public Appareil(Object appareil) {
+    public Appareil(Object appareil, Object ident) {
         this.name = (String)appareil;
+        this.ident = (String)ident;
 
         if(this.name.equals("volet") || this.name.equals("fenetre")) {
             this.classType = "CVoletFenetre";
@@ -17,15 +19,15 @@ public class Appareil {
         return this.name;
     }
 
+    public String getIdent() {
+        return this.ident;
+    }
+
     public String getClassType() {
         return this.classType;
     }
 
-    public String generateCodeForIdent(String ident) {
-        return this.getClassType() + " " + ident + " = new " + this.getClassType() + "(\"" + ident + "\", TypeAppareil." + this.getName().toUpperCase() + ");" + "\nma_liste_appareils.add(" + ident + ");";
-    }
-
     public String toString() {
-        return " ";
+        return this.classType + " " + this.ident + " = new " + this.classType + "(\"" + this.ident + "\", TypeAppareil." + this.getName().toUpperCase() + ");" + "\nma_liste_appareils.add(" + this.ident + ");";
     }
 }

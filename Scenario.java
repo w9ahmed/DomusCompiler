@@ -4,7 +4,6 @@ public class Scenario {
 
     public Scenario(String name) {
         this.name = Utils.retrieveName(name);
-        System.out.println(this.name);
     }
 
     public String getName() {

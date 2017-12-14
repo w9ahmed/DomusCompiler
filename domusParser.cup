@@ -157,19 +157,20 @@ states ::=
 message_subitem ::=
 	  STRING_LITERAL:s {: RESULT = ((String) s).replaceAll("\"", ""); :}
 	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {: RESULT = s; :}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {: RESULT = s; :};
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {: RESULT = s; :}
+	|;
 
 
 // APPAREIL
 item ::= appareils:a appareils_subitem:id {:
-	Appareil appareil = new Appareil(a);
 	while(!stack.isEmpty()) {
-		String identifier = stack.pop();
-		domus.writerMaisonln(appareil.generateCodeForIdent(identifier));
+		Appareil appareil = new Appareil(a, stack.pop());
+		code.add(appareil);
+		domus.writerMaisonln(appareil.toString());
 	}
 :};
 appareils_subitem ::=
-	  IDENTIFIER:id DOT {: RESULT = id; :}
+	  IDENTIFIER:id DOT {: stack.push(id); :}
 	| IDENTIFIER:id COMMA appareils_subitem {: stack.push(id); :};
 
 
@@ -177,9 +178,9 @@ appareils_subitem ::=
 item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE autre_appareils_subitem {:
 	String appareils = (String) ap;
 	while(!stack.isEmpty()) {
-		String identifier = stack.pop();
-		domus.writerMaisonln("CAutreAppareil " + identifier + " = new CAutreAppareil(\"" + identifier + "\", TypeAppareil.AUTRE_APPAREIL_" + appareils.toUpperCase() + ");");
-		domus.writerMaisonln("ma_liste_appareils.add(" + identifier + ");");
+		AutreAppareil autreAppareil = new AutreAppareil(ap, stack.pop());
+		code.add(autreAppareil);
+		domus.writerMaisonln(autreAppareil.toString());
 	}
 :};
 autre_appareils_subitem ::=
