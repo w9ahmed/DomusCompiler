@@ -165,12 +165,10 @@ message_subitem ::=
 
 // APPAREIL
 item ::= appareils:a appareils_subitem {:
-	// TODO Update class name for VOLET to VoletFENETRE
-	String appareils = (String) a;
-	String className = "C" + appareils.substring(0, 1).toUpperCase() + appareils.substring(1);
+	Appareil appareil = new Appareil(a);
 	while(!stack.isEmpty()) {
 		String identifier = stack.pop();
-		writer1.appendln(className + " " + identifier + " = new " + className + "(\"" + identifier + "\", TypeAppareil." + appareils.toUpperCase() + ");");
+		writer1.appendln(appareil.getClassType() + " " + identifier + " = new " + appareil.getClassType() + "(\"" + identifier + "\", TypeAppareil." + appareil.getName().toUpperCase() + ");");
 		writer1.appendln("ma_liste_appareils.add(" + identifier + ");");
 	}
 :};
