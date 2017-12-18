@@ -77,7 +77,7 @@ run_parser() {
 test_all() {
 	FILE1="test.domus"
 	FILE2="exo-simple.txt"
-	FILE3="ex1ok"
+	FILE3="ex0pb_lex"
 
 	echo -e '\e[34mRunning parser on file:\e[39m' $FILE1
 	java parser < "$TESTDIR/$FILE1"

@@ -73,7 +73,7 @@ item ::= BLOCK_COMMENT:s {: code.add(new Comment(s)); :};
 
 // TAGS
 item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: domus = new DomusProgram(); :};
-item ::= PROGRAMME_DOMUS_CLOSE_TAG:s {: :};
+item ::= PROGRAMME_DOMUS_CLOSE_TAG:s;
 
 item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
 	// clean code container before defining appareil
@@ -82,26 +82,26 @@ item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
 :};
 item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: System.out.println(code);:};
 
-item ::= DECLARATION_INTERFACE_OPEN_TAG:s {: :};
-item ::= DECLARATION_INTERFACE_CLOSE_TAG:s {: :};
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s;
+item ::= DECLARATION_INTERFACE_CLOSE_TAG:s;
 
 item ::= DECLARATION_SCENARII_OPEN_TAG:s {: domus.createScenarii(); :};
-item ::= DECLARATION_SCENARII_CLOSE_TAG:s {: :};
+item ::= DECLARATION_SCENARII_CLOSE_TAG:s;
 
 item ::= SCENARIO_OPEN_TAG:s {:
 :};
 item ::= SCENARIO_CLOSE_TAG:s {:
 :};
 
-item ::= DECLARATION_COMMANDES_OPEN_TAG:s {: :};
-item ::= DECLARATION_COMMANDES_CLOSE_TAG:s {: :};
+item ::= DECLARATION_COMMANDES_OPEN_TAG:s;
+item ::= DECLARATION_COMMANDES_CLOSE_TAG:s;
 
 appareils ::= 
-	  ECLAIRAGE:a {: RESULT = a; :} 
-	| VOLET:a {: RESULT = a; :}
-	| CHAUFFAGE:a {: RESULT = a; :}
-	| ALARME:a {: RESULT = a; :}
-	| FENETRE:a {: RESULT = a; :};
+	  ECLAIRAGE:a 
+	| VOLET:a
+	| CHAUFFAGE:a
+	| ALARME:a
+	| FENETRE:a;
 
 autre_appareils ::= 
 	 TV:ap {: RESULT = "tv"; :}
@@ -141,9 +141,9 @@ states ::=
 	| FERME:s {: RESULT = s; :};
 
 message_subitem ::=
-	  STRING_LITERAL:s {: RESULT = ((String) s).replaceAll("\"", ""); :}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem {: RESULT = s; :}
-	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem {: RESULT = s; :}
+	  STRING_LITERAL:s
+	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem
 	|;
 
 
@@ -174,26 +174,13 @@ autre_appareils_subitem ::=
 
 
 // DEFINIR
-item::= DEFINIR IDENTIFIER:id ASSIGN CURLY_BRACKET_OPEN definir_subitem CURLY_BRACKET_CLOSE DOT {:
-	domus.writerMaisonln("CEnsAppareil " + id + " = new CAutreAppareil(\"" + id + "\");");
-	while(!stack.isEmpty()) {
-		String identifier = stack.pop();
-		domus.writerMaisonln(id + ".add(" + identifier + ");");
-	}
-	domus.writerMaisonln("ma_liste_ens_appareils.add(" + id + ");");
-:};
+item::= DEFINIR IDENTIFIER:id ASSIGN CURLY_BRACKET_OPEN definir_subitem CURLY_BRACKET_CLOSE DOT;
 definir_subitem ::=
 	  IDENTIFIER:id
 	| IDENTIFIER:id COMMA definir_subitem;
 
 // INTERFACE
-item ::= interfaces:i interfaces_subitem {:
-	while(!stack.isEmpty()) {
-		Interface interf = new Interface(i, stack.pop());
-		code.add(interf);
-		domus.writerMaisonln(interf.toString());
-	}
-:};
+item ::= interfaces:i interfaces_subitem;
 interfaces_subitem ::=
 	  IDENTIFIER:id DOT
 	| IDENTIFIER:id COMMA interfaces_subitem;
@@ -206,29 +193,28 @@ pourtout_subitem ::=
 	| IDENTIFIER:id COLON AUTRE_APPAREIL:a
 	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE;
 pourtout_action ::=
-	  IDENTIFIER:id DOT actions:aa {: :}
-	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+	  IDENTIFIER:id DOT actions:aa
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE;
 
 
 item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON;
 // TO BE UPDATED THIS PART
-item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON {::};
+item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON;
 si_condition ::=
 	 IDENTIFIER:id DOT ETAT EQUALS states:state;
 si_subitem ::=
-	  IDENTIFIER:id DOT actions:app_action {::}
-	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE {::};
+	  IDENTIFIER:id DOT actions:app_action
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE;
 
-
-item ::= SINON sinon_subitem FSI SEMI_COLON {::};
+item ::= SINON sinon_subitem FSI SEMI_COLON;
 sinon_subitem ::=
-	  IDENTIFIER:id DOT actions:app_action SEMI_COLON sinon_subitem {::}
-	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON sinon_subitem {::}
+	  IDENTIFIER:id DOT actions:app_action SEMI_COLON sinon_subitem
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON sinon_subitem
 	|;
 
-// item ::= IDENTIFIER:id DOT ETAT {::};
-item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON {::};
-item ::= FSI SEMI_COLON {::};
+// item ::= IDENTIFIER:id DOT ETAT;
+item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON;
+item ::= FSI SEMI_COLON;
 
 item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON;
 
