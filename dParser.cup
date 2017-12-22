@@ -1,0 +1,233 @@
+import java_cup.runtime.*;
+import java.util.*;
+
+parser code {:
+	public static void main(String args[]) throws Exception {
+		new parser(new Yylex(System.in)).parse();
+	}
+	
+	public void syntax_error(Symbol s) {
+    	System.out.println("compiler has detected a syntax error at line " + getLine() + " column " + getColumn());
+		System.out.println(getText());
+	}
+
+	public int getLine() {
+		return ((Yylex) getScanner()).getLine();
+	}
+
+	public int getColumn() {
+		return ((Yylex) getScanner()).getColumn();
+	}
+	
+	public String getText() {
+		return ((Yylex) getScanner()).getText();
+	}
+:}
+
+action code {:
+	DomusProgram domus;
+	Scenario scenario;
+	List<Appareil> appareils = new ArrayList<Appareil>();
+
+	Hashtable< String, String > table = new Hashtable< String, String >();
+	Stack<String> stack = new Stack<String>();
+	int programmerCount = 0;
+	List scenarii = new ArrayList();
+	List<Object> code = new ArrayList<Object>();
+:}
+
+terminal PROGRAMME_DOMUS_OPEN_TAG, PROGRAMME_DOMUS_CLOSE_TAG,
+ DECLARATION_APPAREILS_OPEN_TAG, DECLARATION_APPAREILS_CLOSE_TAG,
+ DECLARATION_INTERFACE_OPEN_TAG, DECLARATION_INTERFACE_CLOSE_TAG,
+ DECLARATION_SCENARII_OPEN_TAG, DECLARATION_SCENARII_CLOSE_TAG,
+ DECLARATION_COMMANDES_OPEN_TAG, DECLARATION_COMMANDES_CLOSE_TAG,
+ 
+ DEFINIR, EXECUTOR_SCENARIO, ASSOCIER, PROGRAMMER, MESSAGE, POURTOUT,
+ FAIRE, FAIT, SI, ALORS, SINON, FSI, OUVRIR, FERMER, ETEINDRE, ALLUMER,
+ TAMISER, ETAT, ALLUMER_PARTIEL, ALLUMER_ECO, OUVRIR_PARTIEL, ALLUME, ETEINT,
+ DEMI, ECO, OUVERT, FERME, TABLETTE, TV, HIFI, CAFETIERE, VIDEO_PROJ,
+ LAVE_VAISSELLE, LAVE_LINGE, SECHE_LINGE, ORDINATEUR, PORTAIL, FERMER_PARTIEL,
+
+ DOT, COMMA, COLON, ASSIGN, SEMI_COLON, CURLY_BRACKET_OPEN, CURLY_BRACKET_CLOSE, EQUALS, PARANTHESES_OPEN, PARANTHESES_CLOSE;
+
+terminal String SCENARIO_OPEN_TAG,SCENARIO_CLOSE_TAG, IDENTIFIER, LINE_COMMENT, BLOCK_COMMENT, STRING_LITERAL, DATE;
+// appareils
+terminal String ECLAIRAGE, VOLET, CHAUFFAGE, ALARME, FENETRE, AUTRE_APPAREIL;
+// interface
+terminal String INTERRUPTEUR, MOBILE, TELEPHONE, TELECOMMANDE;
+
+non terminal expr, list, item;
+non terminal appareils_subitem, interfaces_subitem, autre_appareils_subitem, definir_subitem;
+non terminal pourtout_subitem, pourtout_action, si_condition, si_subitem, sinon_subitem, message_subitem, programmer_subset, associer_subitem;
+non terminal appareils, autre_appareils, interfaces, actions, states;
+
+expr ::= list {:
+	System.out.println("\n\nSucessfully compiled!");
+:} | {: System.out.println("Empty domus file!"); :};
+
+list ::= item list | item;
+
+// COMMENTS
+item ::= LINE_COMMENT:s {: code.add(new Comment(s)); :};
+item ::= BLOCK_COMMENT:s {: code.add(new Comment(s)); :};
+
+// TAGS
+item ::= PROGRAMME_DOMUS_OPEN_TAG:s {: domus = new DomusProgram(); :};
+item ::= PROGRAMME_DOMUS_CLOSE_TAG:s;
+
+item ::= DECLARATION_APPAREILS_OPEN_TAG:s {:
+	// clean code container before defining appareil
+	// code.clear();
+	System.out.println(code);
+:};
+item ::= DECLARATION_APPAREILS_CLOSE_TAG:s {: System.out.println(code);:};
+
+item ::= DECLARATION_INTERFACE_OPEN_TAG:s;
+item ::= DECLARATION_INTERFACE_CLOSE_TAG:s;
+
+item ::= DECLARATION_SCENARII_OPEN_TAG:s {: domus.createScenarii(); :};
+item ::= DECLARATION_SCENARII_CLOSE_TAG:s;
+
+item ::= SCENARIO_OPEN_TAG:s {:
+:};
+item ::= SCENARIO_CLOSE_TAG:s {:
+:};
+
+item ::= DECLARATION_COMMANDES_OPEN_TAG:s;
+item ::= DECLARATION_COMMANDES_CLOSE_TAG:s;
+
+appareils ::= 
+	  ECLAIRAGE:a 
+	| VOLET:a
+	| CHAUFFAGE:a
+	| ALARME:a
+	| FENETRE:a;
+
+autre_appareils ::= 
+	 TV:ap {: RESULT = "tv"; :}
+	| HIFI:ap {: RESULT = "hifi"; :}
+	| CAFETIERE:ap {: RESULT = "cafe"; :}
+	| VIDEO_PROJ:ap {: RESULT = "video_proj"; :}
+	| LAVE_VAISSELLE:ap {: RESULT = "lave_vaisselle"; :}
+	| LAVE_LINGE:ap {: RESULT = "lave_linge"; :}
+	| SECHE_LINGE:ap {: RESULT = "seche_linge"; :}
+	| ORDINATEUR:ap {: RESULT = "ordinateur"; :}
+	| PORTAIL:ap {: RESULT = "portail"; :};
+
+interfaces ::= 
+	  TABLETTE:i {: RESULT = i; :} |
+	  INTERRUPTEUR:i {: RESULT = i; :}
+	| MOBILE:i {: RESULT = i; :}
+	| TELEPHONE:i {: RESULT = i; :}
+	| TELECOMMANDE:i {: RESULT = i; :};
+
+actions ::=
+      OUVRIR:a {: RESULT = a; :}
+	| FERMER:a {: RESULT = a; :} 
+	| ETEINDRE:a {: RESULT = a; :} 
+	| ALLUMER :a {: RESULT = a; :}
+	| TAMISER:a {: RESULT = a; :}
+	| ALLUMER_PARTIEL:a {: RESULT = a; :}
+	| ALLUMER_ECO:a {: RESULT = a; :}
+	| OUVRIR_PARTIEL:a {: RESULT = a; :}
+	| FERMER_PARTIEL:a  {: RESULT = a; :};
+
+states ::=
+	  ALLUME :s {: RESULT = s; :}
+	| ETEINT:s {: RESULT = s; :}
+	| DEMI:s {: RESULT = s; :}
+	| ECO:s {: RESULT = s; :}
+	| OUVERT:s {: RESULT = s; :}
+	| FERME:s {: RESULT = s; :};
+
+message_subitem ::=
+	  STRING_LITERAL:s
+	| STRING_LITERAL:s COMMA IDENTIFIER:id message_subitem
+	| STRING_LITERAL:s COMMA IDENTIFIER:id DOT ETAT message_subitem
+	|;
+
+
+// APPAREIL
+item ::= appareils:a appareils_subitem:id {:
+	while(!stack.isEmpty()) {
+		Appareil appareil = new Appareil(a, stack.pop());
+		code.add(appareil);
+		domus.writerMaisonln(appareil.toString());
+	}
+:};
+appareils_subitem ::=
+	  IDENTIFIER:id DOT
+	| IDENTIFIER:id COMMA appareils_subitem;
+
+
+// AUTRE APPAREIL
+item ::= AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:ap PARANTHESES_CLOSE autre_appareils_subitem {:
+	while(!stack.isEmpty()) {
+		AutreAppareil autreAppareil = new AutreAppareil(ap, stack.pop());
+		code.add(autreAppareil);
+		domus.writerMaisonln(autreAppareil.toString());
+	}
+:};
+autre_appareils_subitem ::=
+	  IDENTIFIER:id DOT
+	| IDENTIFIER:id COMMA autre_appareils_subitem;
+
+
+// DEFINIR
+item::= DEFINIR IDENTIFIER:id ASSIGN CURLY_BRACKET_OPEN definir_subitem CURLY_BRACKET_CLOSE DOT;
+definir_subitem ::=
+	  IDENTIFIER:id
+	| IDENTIFIER:id COMMA definir_subitem;
+
+// INTERFACE
+item ::= interfaces:i interfaces_subitem;
+interfaces_subitem ::=
+	  IDENTIFIER:id DOT
+	| IDENTIFIER:id COMMA interfaces_subitem;
+
+
+item ::= POURTOUT pourtout_subitem FAIRE pourtout_action SEMI_COLON FAIT SEMI_COLON;
+pourtout_subitem ::=
+	  IDENTIFIER:id COLON appareils:a
+	| IDENTIFIER:id COLON IDENTIFIER:a 
+	| IDENTIFIER:id COLON AUTRE_APPAREIL:a
+	| IDENTIFIER:id COLON AUTRE_APPAREIL PARANTHESES_OPEN autre_appareils:a PARANTHESES_CLOSE;
+pourtout_action ::=
+	  IDENTIFIER:id DOT actions:aa
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE;
+
+
+item ::= IDENTIFIER:id DOT actions:app_action SEMI_COLON;
+// TO BE UPDATED THIS PART
+item ::= SI PARANTHESES_OPEN si_condition PARANTHESES_CLOSE ALORS si_subitem SEMI_COLON;
+si_condition ::=
+	 IDENTIFIER:id DOT ETAT EQUALS states:state;
+si_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE;
+
+item ::= SINON sinon_subitem FSI SEMI_COLON;
+sinon_subitem ::=
+	  IDENTIFIER:id DOT actions:app_action SEMI_COLON sinon_subitem
+	| MESSAGE PARANTHESES_OPEN message_subitem PARANTHESES_CLOSE SEMI_COLON sinon_subitem
+	|;
+
+// item ::= IDENTIFIER:id DOT ETAT;
+item ::= IDENTIFIER:id DOT states:app_state SEMI_COLON;
+item ::= FSI SEMI_COLON;
+
+item ::= EXECUTOR_SCENARIO IDENTIFIER:id SEMI_COLON;
+
+item ::= MESSAGE PARANTHESES_OPEN message_subitem:message PARANTHESES_CLOSE SEMI_COLON;
+
+item ::= ASSOCIER IDENTIFIER:id ASSIGN associer_subitem DOT;
+associer_subitem ::=
+	  IDENTIFIER:id
+	| IDENTIFIER:id COMMA associer_subitem
+	| CURLY_BRACKET_OPEN associer_subitem CURLY_BRACKET_CLOSE;
+
+item ::= PROGRAMMER IDENTIFIER:id ASSIGN programmer_subset DOT;
+programmer_subset ::=
+	  DATE:date
+	| DATE:date COMMA programmer_subset 
+	| CURLY_BRACKET_OPEN programmer_subset CURLY_BRACKET_CLOSE;

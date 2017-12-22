@@ -2,9 +2,10 @@
 
 
 LEXFILE="analyzer.lex"
-CUPFILE="domusParser.cup"
+CUPFILE="dParser.cup"
 
 TESTDIR="test"
+
 TESTFILE="test.domus"
 # TESTFILE="exo-simple.txt"
 
@@ -73,6 +74,26 @@ run_parser() {
 	move_files
 }
 
+test_all() {
+	FILE1="test.domus"
+	FILE2="exo-simple.txt"
+	FILE3="ex0pb_lex"
+
+	echo -e '\e[34mRunning parser on file:\e[39m' $FILE1
+	java parser < "$TESTDIR/$FILE1"
+	move_files
+
+	echo -e $SEPERATOR
+	echo -e '\e[34mRunning parser on file:\e[39m' $FILE2
+	java parser < "$TESTDIR/$FILE2"
+	move_files
+
+	echo -e $SEPERATOR
+	echo -e '\e[34mRunning parser on file:\e[39m' $FILE3
+	java parser < "$TESTDIR/$FILE3"
+	move_files
+}
+
 open_files() {
 	if [ -f generated/CMaisonUser.java ]
 	then
@@ -105,7 +126,7 @@ compile() {
 run_all() {
 	compile
 	echo -e $SEPERATOR
-	run_parser
+	test_all
 }
 
 case "$1" in
@@ -128,6 +149,9 @@ clean|c)
 ;;
 test|t)
 	run_parser
+;;
+tests|ts)
+	test_all
 ;;
 which|w)
 	echo -e "* \e[100mLex file:\e[49m"
